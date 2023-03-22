@@ -9,10 +9,12 @@ import (
 	"github.com/gin-gonic/gin"
 	"short_link_sys_web_be/log"
 	"short_link_sys_web_be/middleware"
+	"short_link_sys_web_be/router"
 )
 
 func main() {
 	engine := gin.New()
 	engine.Use(log.Middleware)
 	engine.Use(middleware.CrosMiddleware)
+	router.LoadAllRouter(engine)
 }
