@@ -14,10 +14,10 @@ import (
 	"time"
 )
 
-var rtd = RealtimeData{
-	CPUUsageRatioLastSec:  20,
-	MemUsageRatioLastSec:  30,
-	DiskUsageRatioLastSec: 50,
+var testRtd = Info1s{
+	CPUUsageRatioSec:  20,
+	MemUsageRatioSec:  30,
+	DiskUsageRatioSec: 50,
 }
 
 var upgrader = websocket.Upgrader{
@@ -43,7 +43,7 @@ func RealtimeDataHandler(ctx *gin.Context) {
 	}(conn)
 
 	for {
-		jsonStats, err := json.Marshal(rtd)
+		jsonStats, err := json.Marshal(testRtd)
 		if err != nil {
 			ModuleLogger.Error(err)
 			return
@@ -55,9 +55,9 @@ func RealtimeDataHandler(ctx *gin.Context) {
 			return
 		}
 
-		rtd.CPUUsageRatioLastSec += 1
-		rtd.MemUsageRatioLastSec += 1
-		rtd.DiskUsageRatioLastSec += 1
+		testRtd.CPUUsageRatioSec += 1
+		testRtd.MemUsageRatioSec += 1
+		testRtd.DiskUsageRatioSec += 1
 
 		time.Sleep(transferGap)
 	}

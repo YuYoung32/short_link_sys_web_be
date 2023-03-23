@@ -14,28 +14,26 @@ import (
 
 func ServerRouter(engine *gin.Engine) {
 	group := engine.Group("/server")
-	group.GET("/info_1s", server.RealtimeDataHandler)
-	group.GET("/static_info", server.StaticInfoHandler)
-	group.GET("/cpu_xhr", server.CPUUsageRatiosHandler)
-	group.GET("/memory_xhr", server.MemoryUsageRatiosHandler)
-	group.GET("/disk_xhr", server.DiskUsageRatiosHandler)
-	group.GET("/ttl_xhr", server.TTLHandler)
+	group.GET("/info1S", server.RealtimeDataHandler)
+	group.GET("/info1Min", server.Info1MinListHandler)
+	group.GET("/staticInfo", server.StaticInfoHandler)
+	group.GET("/infoXhr", server.InfoXhrListHandler)
 }
 
 func VisitRouter(engine *gin.Engine) {
 	group := engine.Group("/visit")
-	group.GET("/amount_xhr", visit.AmountXHourHandler)
-	group.GET("/amount", visit.AmountHandler)
-	group.GET("/ip_xhr", visit.IPXHourHandler)
-	group.GET("/details", visit.DetailsHandler)
+	group.GET("/amountXhr", visit.AmountXHourListHandler)
+	group.GET("/amountXhrTotal", visit.AmountXHourTotalHandler)
+	group.GET("/ipXhr", visit.IPXHourListHandler)
+	group.GET("/details", visit.DetailsListHandler)
 }
 
 func LinkRouter(engine *gin.Engine) {
 	group := engine.Group("/link")
-	group.GET("/details", link.GetLinkDetailsListHandler)
-	group.GET("/add", link.AddLinkHandler)
+	group.GET("/details", link.DetailsListHandler)
+	group.POST("/add", link.AddLinkHandler)
 	group.GET("/del", link.DelLinkHandler)
-	group.GET("/total_amount", link.GetTotalAmountHandler)
+	group.GET("/amountTotal", link.AmountTotalHandler)
 }
 
 func LoadAllRouter(engine *gin.Engine) {

@@ -5,7 +5,7 @@
 
 package visit
 
-type Details []struct {
+type Details struct {
 	LongUrl   string `json:"longUrl"`
 	ShortUrl  string `json:"shortUrl"`
 	IP        string `json:"IP"`
@@ -14,6 +14,18 @@ type Details []struct {
 	Timestamp string `json:"timestamp"`
 }
 
-type AmountList []int
+type IPSource struct {
+	Region string `json:"region"`
+	Amount int    `json:"amount"`
+}
+
 type Amount int
-type IPSourceList []string
+
+type AmountTotal struct {
+	Amount Amount `json:"amountTotal"`
+}
+
+type AmountTime struct {
+	TimePoints []int    `json:"xHourTimePoints"`
+	Amount     []Amount `json:"amount"`
+}

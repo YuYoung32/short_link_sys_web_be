@@ -13,8 +13,16 @@ import (
 )
 
 func main() {
+	moduleLogger := log.MainLogger.WithField("module", "main")
+
 	engine := gin.New()
 	engine.Use(log.Middleware)
 	engine.Use(middleware.CrosMiddleware)
 	router.LoadAllRouter(engine)
+
+	err := engine.Run(":8081")
+	if err != nil {
+		moduleLogger.Error(err)
+		panic(err)
+	}
 }

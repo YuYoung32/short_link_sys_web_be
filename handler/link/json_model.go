@@ -11,4 +11,8 @@ type Details struct {
 	CreateTime string `json:"createTime"`
 }
 
-type TotalAmount int
+type Amount int
+
+type AmountTotal struct {
+	Amount Amount `json:"amountTotal"`
+}

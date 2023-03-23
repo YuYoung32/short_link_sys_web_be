@@ -8,7 +8,6 @@ package log
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
-	"io"
 	"os"
 	"time"
 )
@@ -19,14 +18,14 @@ var (
 )
 
 type TempLogConf struct {
-	Level    string `json:"level"`
-	FilePath string `json:"file_path"`
+	Level   string `json:"level"`
+	DicPath string `json:"file_path"`
 }
 
 func GetLogConf() TempLogConf {
 	return TempLogConf{
-		Level:    "debug",
-		FilePath: "log/run.log",
+		Level:   "debug",
+		DicPath: "log/",
 	}
 }
 
@@ -43,14 +42,19 @@ func init() {
 	}
 	MainLogger.SetLevel(level[logConf.Level])
 
-	MainLogger.SetFormatter(&logrus.TextFormatter{})
+	MainLogger.SetFormatter(&logrus.TextFormatter{
+		TimestampFormat: "2006-01-02 15:04:05",
+		ForceColors:     true,
+	})
 
-	file, err := os.OpenFile(logConf.FilePath, os.O_CREATE|os.O_APPEND|os.O_WRONLY, os.ModeAppend)
-	if err != nil {
-		panic(err)
-	}
+	//logFilePath := logConf.DicPath + time.Now().Format("2006-01-02-15-04-05") + "_log.log"
+	//file, err := os.OpenFile(logFilePath, os.O_CREATE|os.O_APPEND|os.O_WRONLY, os.ModeAppend)
+	//if err != nil {
+	//	panic(err)
+	//}
 
-	MainLogger.SetOutput(io.MultiWriter(file, os.Stdout))
+	//MainLogger.SetOutput(io.MultiWriter(file, os.Stdout))
+	MainLogger.SetOutput(os.Stdout)
 
 	MainLogger.Info("Logrus init success")
 }
@@ -81,8 +85,14 @@ func Middleware(c *gin.Context) {
 	// 请求IP
 	clientIP := c.ClientIP()
 
-	// 日志格式
-	MainLogger.Infof("| %3d | %13v | %15s | %s | %s |",
+	//MainLogger.Infof("| %3d | %13v | %15s | %s | %s |",
+	//	statusCode,
+	//	latencyTime,
+	//	clientIP,
+	//	reqMethod,
+	//	reqUri,
+	//)
+	MainLogger.Debugf("| %3d | %13v | %15s | %s | %s |",
 		statusCode,
 		latencyTime,
 		clientIP,
