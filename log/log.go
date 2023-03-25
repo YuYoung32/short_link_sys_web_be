@@ -60,12 +60,12 @@ func init() {
 }
 
 // Middleware 日志中间件
-func Middleware(c *gin.Context) {
+func Middleware(ctx *gin.Context) {
 	// 开始时间
 	startTime := time.Now()
 
 	// 处理请求
-	c.Next()
+	ctx.Next()
 
 	// 结束时间
 	endTime := time.Now()
@@ -74,16 +74,16 @@ func Middleware(c *gin.Context) {
 	latencyTime := endTime.Sub(startTime)
 
 	// 请求方式
-	reqMethod := c.Request.Method
+	reqMethod := ctx.Request.Method
 
 	// 请求路由
-	reqUri := c.Request.RequestURI
+	reqUri := ctx.Request.RequestURI
 
 	// 状态码
-	statusCode := c.Writer.Status()
+	statusCode := ctx.Writer.Status()
 
 	// 请求IP
-	clientIP := c.ClientIP()
+	clientIP := ctx.ClientIP()
 
 	//MainLogger.Infof("| %3d | %13v | %15s | %s | %s |",
 	//	statusCode,

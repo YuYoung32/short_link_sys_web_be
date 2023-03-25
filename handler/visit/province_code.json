@@ -1,0 +1,134 @@
+[
+  {
+    "name": "安徽",
+    "code": "AH"
+  },
+  {
+    "name": "北京",
+    "code": "BJ"
+  },
+  {
+    "name": "福建",
+    "code": "FJ"
+  },
+  {
+    "name": "甘肃",
+    "code": "GS"
+  },
+  {
+    "name": "广东",
+    "code": "GD"
+  },
+  {
+    "name": "广西",
+    "code": "GX"
+  },
+  {
+    "name": "贵州",
+    "code": "GZ"
+  },
+  {
+    "name": "海南",
+    "code": "HI"
+  },
+  {
+    "name": "河北",
+    "code": "HE"
+  },
+  {
+    "name": "黑龙江",
+    "code": "HL"
+  },
+  {
+    "name": "河南",
+    "code": "HA"
+  },
+  {
+    "name": "香港",
+    "code": "HK"
+  },
+  {
+    "name": "湖北",
+    "code": "HB"
+  },
+  {
+    "name": "湖南",
+    "code": "HN"
+  },
+  {
+    "name": "内蒙古",
+    "code": "NM"
+  },
+  {
+    "name": "江苏",
+    "code": "JS"
+  },
+  {
+    "name": "江西",
+    "code": "JX"
+  },
+  {
+    "name": "吉林",
+    "code": "JL"
+  },
+  {
+    "name": "辽宁",
+    "code": "LN"
+  },
+  {
+    "name": "澳门",
+    "code": "MO"
+  },
+  {
+    "name": "宁夏",
+    "code": "NX"
+  },
+  {
+    "name": "青海",
+    "code": "QH"
+  },
+  {
+    "name": "山东",
+    "code": "SD"
+  },
+  {
+    "name": "上海",
+    "code": "SH"
+  },
+  {
+    "name": "山西",
+    "code": "SX"
+  },
+  {
+    "name": "陕西",
+    "code": "SN"
+  },
+  {
+    "name": "四川",
+    "code": "SC"
+  },
+  {
+    "name": "台湾",
+    "code": "TW"
+  },
+  {
+    "name": "天津",
+    "code": "TJ"
+  },
+  {
+    "name": "新疆",
+    "code": "XJ"
+  },
+  {
+    "name": "西藏",
+    "code": "XZ"
+  },
+  {
+    "name": "云南",
+    "code": "YN"
+  },
+  {
+    "name": "浙江",
+    "code": "ZJ"
+  }
+]

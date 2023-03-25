@@ -6,30 +6,102 @@
 package visit
 
 import (
+	_ "embed"
+	"encoding/json"
+	"errors"
 	"github.com/gin-gonic/gin"
+	"math/rand"
 	"net/http"
 	. "short_link_sys_web_be/handler/common"
+	"short_link_sys_web_be/log"
 	"strconv"
+	"time"
 )
 
-func testAmountListDataGenerator(x int) AmountTime {
+var (
+	//go:embed province_code.json
+	provinceCodeFile []byte
+	ProvinceList     []string
+	CodeList         []string
+	ProvinceToCode   = make(map[string]string)
+	CodeToProvince   = make(map[string]string)
+)
+
+func init() {
+	logger := log.MainLogger.WithField("module", "visit_handler_init")
+
+	var data []map[string]string
+	err := json.Unmarshal(provinceCodeFile, &data)
+	if err != nil {
+		logger.Error("Unmarshal province_code.json failed: " + err.Error())
+		return
+	}
+	for _, item := range data {
+		ProvinceList = append(ProvinceList, item["name"])
+		CodeList = append(CodeList, item["code"])
+		ProvinceToCode[item["name"]] = item["code"]
+		CodeToProvince[item["code"]] = item["name"]
+	}
+}
+
+func testDayVADataGenerator(day time.Time) AmountTime {
 	var amountTime AmountTime
-	for i := 0; i < x; i++ {
-		amountTime.TimePoints = append(amountTime.TimePoints, i)
-		amountTime.Amount = append(amountTime.Amount, Amount(i))
+	for i := 0; i < 24; i++ {
+		amountTime.Amount = append(amountTime.Amount, day.Day()+i)
 	}
 	return amountTime
 }
 
-func testIPSourceListDataGenerator() []IPSource {
-	var ipSourceList []IPSource
-	for i := 0; i < 10; i++ {
-		ipSourceList = append(ipSourceList, IPSource{
-			Region: "浙江",
-			Amount: i,
+func testBetweenVADataGenerator(begin time.Time, end time.Time) AmountTime {
+	var amountTime AmountTime
+	for i := begin.Day(); i <= end.Day(); i++ {
+		amountTime.Amount = append(amountTime.Amount, i)
+	}
+	return amountTime
+}
+
+// getRandArr 生成随机数组 数组内容0-32
+func getRandArr() []int {
+	arr := make([]int, 33)
+	for i := 0; i < len(arr); i++ {
+		arr[i] = i
+	}
+	rand.Seed(time.Now().UnixNano())
+
+	// 使用 Fisher-Yates 洗牌算法打乱数组
+	for i := len(arr) - 1; i > 0; i-- {
+		j := rand.Intn(i + 1)
+		arr[i], arr[j] = arr[j], arr[i]
+	}
+	return arr
+}
+
+func testDayIPDataGenerator(day time.Time) []IPSource {
+	provinceList := getRandArr()
+	amountList := getRandArr()
+
+	var ipSource []IPSource
+	for i := 0; i < day.Day(); i++ {
+		ipSource = append(ipSource, IPSource{
+			Region: ProvinceList[provinceList[i]],
+			Amount: amountList[i] + 1,
 		})
 	}
-	return ipSourceList
+	return ipSource
+}
+
+func testBetweenIPDataGenerator(begin time.Time, end time.Time) []IPSource {
+	provinceList := getRandArr()
+	amountList := getRandArr()
+
+	var ipSource []IPSource
+	for i := begin.Day(); i <= end.Day(); i++ {
+		ipSource = append(ipSource, IPSource{
+			Region: ProvinceList[provinceList[i]],
+			Amount: amountList[i] + 1,
+		})
+	}
+	return ipSource
 }
 
 func testDetailsListDataGenerator() []Details {
@@ -47,37 +119,35 @@ func testDetailsListDataGenerator() []Details {
 	return detailsList
 }
 
-func AmountXHourTotalHandler(ctx *gin.Context) {
-	ctx.Set("module", "amount_x_hour_total_handler")
-	x := ctx.Query("x")
-	if x == "" {
+func parseTimeOrBadResponse(ctx *gin.Context) (error, time.Time, time.Time) {
+	begin := ctx.Query("begin")
+	end := ctx.Query("end")
+	beginTime, err := time.Parse("20060102", begin)
+	endTime, err := time.Parse("20060102", end)
+	if begin == "" || end == "" {
 		ErrMissArgsResp(ctx)
-		return
+		return errors.New(""), beginTime, endTime
 	}
-	intX, err := strconv.Atoi(x)
-	if err != nil || intX <= 0 || intX > MaxSearchHours {
+	if err != nil || beginTime.After(endTime) || endTime.Day() >= time.Now().Day() {
 		ErrInvalidArgsResp(ctx)
-		return
+		return errors.New(""), beginTime, endTime
 	}
-	ctx.JSON(http.StatusOK, AmountTotal{
-		Amount: Amount(intX),
-	})
+	return nil, beginTime, endTime
 }
 
-// AmountXHourListHandler 获取最近x小时的访问量, 分时成list
-func AmountXHourListHandler(ctx *gin.Context) {
-	ctx.Set("module", "amount_x_hour_list_handler")
-	x := ctx.Query("x")
-	if x == "" {
-		ErrMissArgsResp(ctx)
+// AmountListHandler 获取指定时间段的访问量, 同天返回24小时, 其余分天
+func AmountListHandler(ctx *gin.Context) {
+	ctx.Set("module", "amount_list_handler")
+
+	err, beginTime, endTime := parseTimeOrBadResponse(ctx)
+	if err != nil {
 		return
 	}
-	intX, err := strconv.Atoi(x)
-	if err != nil || intX <= 0 || intX > MaxSearchHours {
-		ErrInvalidArgsResp(ctx)
-		return
+	if beginTime.Equal(endTime) {
+		ctx.JSON(http.StatusOK, testDayVADataGenerator(beginTime))
+	} else {
+		ctx.JSON(http.StatusOK, testBetweenVADataGenerator(beginTime, endTime))
 	}
-	ctx.JSON(http.StatusOK, testAmountListDataGenerator(intX))
 }
 
 /*
@@ -86,19 +156,18 @@ IP地址查询方法
 	http://ip.taobao.com/outGetIpInfo?ips=8.8.8.8&accessKey=alibaba-inc
 */
 
-func IPXHourListHandler(ctx *gin.Context) {
-	ctx.Set("module", "ip_x_hour_list_handler")
-	x := ctx.Query("x")
-	if x == "" {
-		ErrMissArgsResp(ctx)
+func IPListHandler(ctx *gin.Context) {
+	ctx.Set("module", "ip_list_handler")
+
+	err, beginTime, endTime := parseTimeOrBadResponse(ctx)
+	if err != nil {
 		return
 	}
-	intX, err := strconv.Atoi(x)
-	if err != nil || intX <= 0 || intX > MaxSearchHours {
-		ErrInvalidArgsResp(ctx)
-		return
+	if beginTime.Equal(endTime) {
+		ctx.JSON(http.StatusOK, testDayIPDataGenerator(beginTime))
+	} else {
+		ctx.JSON(http.StatusOK, testBetweenIPDataGenerator(beginTime, endTime))
 	}
-	ctx.JSON(http.StatusOK, testIPSourceListDataGenerator())
 }
 
 func DetailsListHandler(ctx *gin.Context) {

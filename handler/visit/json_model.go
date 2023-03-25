@@ -19,13 +19,6 @@ type IPSource struct {
 	Amount int    `json:"amount"`
 }
 
-type Amount int
-
-type AmountTotal struct {
-	Amount Amount `json:"amountTotal"`
-}
-
 type AmountTime struct {
-	TimePoints []int    `json:"xHourTimePoints"`
-	Amount     []Amount `json:"amount"`
+	Amount []int `json:"amount"`
 }
