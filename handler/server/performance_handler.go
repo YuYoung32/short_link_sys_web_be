@@ -10,22 +10,43 @@ import (
 	"net/http"
 	. "short_link_sys_web_be/handler/common"
 	"strconv"
+	"sync"
 )
 
-var testStaticInfoData = StaticInfo{
-	MemTotalSize:  10240,
-	DiskTotalSize: 13240,
+type info1MinMutex struct {
+	mutex    sync.Mutex
+	info1Min Info1Min
 }
 
-func testInfo1MinDataGenerator() Info1Min {
-	var info1Min Info1Min
-	for i := 0; i < 60; i++ {
-		info1Min.CPUUsageRatioSec[i] = i
-		info1Min.MemUsageRatioSec[i] = i
-		info1Min.DiskUsageRatioSec[i] = i
+var (
+	testStaticInfoData = StaticInfo{
+		MemTotalSize:  10240,
+		DiskTotalSize: 13240,
 	}
-	return info1Min
+	info info1MinMutex
+)
+
+func init() {
+	go func() {
+		for data := range realTimeDataTransfer {
+			info.mutex.Lock()
+			pushAndPopArr(&info.info1Min, data)
+			info.mutex.Unlock()
+		}
+	}()
 }
+
+func pushAndPopArr(info1Min *Info1Min, data Info1s) {
+	for i := 0; i < 59; i++ {
+		info1Min.CPUUsageRatioSec[i] = info1Min.CPUUsageRatioSec[i+1]
+		info1Min.MemUsageRatioSec[i] = info1Min.MemUsageRatioSec[i+1]
+		info1Min.DiskUsageRatioSec[i] = info1Min.DiskUsageRatioSec[i+1]
+	}
+	info1Min.CPUUsageRatioSec[59] = data.CPUUsageRatioSec
+	info1Min.MemUsageRatioSec[59] = data.MemUsageRatioSec
+	info1Min.DiskUsageRatioSec[59] = data.DiskUsageRatioSec
+}
+
 func testInfoXhrDataGenerator() InfoXhr {
 	var infoXhr InfoXhr
 	for i := 0; i < 60; i++ {
@@ -45,7 +66,7 @@ func StaticInfoHandler(ctx *gin.Context) {
 
 func Info1MinListHandler(ctx *gin.Context) {
 	ctx.Set("module", "info_1_min_list_handler")
-	ctx.JSON(http.StatusOK, testInfo1MinDataGenerator())
+	ctx.JSON(http.StatusOK, info.info1Min)
 }
 
 func InfoXhrListHandler(ctx *gin.Context) {

@@ -9,22 +9,31 @@ import (
 	"encoding/json"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
+	"math/rand"
 	"net/http"
 	"short_link_sys_web_be/log"
+	"sync"
 	"time"
 )
 
-var testRtd = Info1s{
-	CPUUsageRatioSec:  20,
-	MemUsageRatioSec:  30,
-	DiskUsageRatioSec: 50,
+type info1sMutex struct {
+	mutex  sync.Mutex
+	info1s Info1s
 }
 
-var upgrader = websocket.Upgrader{
-	CheckOrigin: func(r *http.Request) bool {
-		return true
-	},
-}
+var (
+	rtd info1sMutex
+
+	upgrader = websocket.Upgrader{
+		CheckOrigin: func(r *http.Request) bool {
+			return true
+		},
+	}
+
+	realTimeDataTransfer = make(
+		chan Info1s, 1,
+	)
+)
 
 func RealtimeDataHandler(ctx *gin.Context) {
 	ModuleLogger := log.MainLogger.WithField("module", "realtime_data_handler")
@@ -43,7 +52,9 @@ func RealtimeDataHandler(ctx *gin.Context) {
 	}(conn)
 
 	for {
-		jsonStats, err := json.Marshal(testRtd)
+		rand.Seed(time.Now().UnixNano())
+
+		jsonStats, err := json.Marshal(rtd.info1s)
 		if err != nil {
 			ModuleLogger.Error(err)
 			return
@@ -55,10 +66,14 @@ func RealtimeDataHandler(ctx *gin.Context) {
 			return
 		}
 
-		testRtd.CPUUsageRatioSec += 1
-		testRtd.MemUsageRatioSec += 1
-		testRtd.DiskUsageRatioSec += 1
+		rtd.mutex.Lock()
+		// 竞争：远端读数据，本地读取再发送
+		rtd.info1s.CPUUsageRatioSec = rand.Intn(101)
+		rtd.info1s.MemUsageRatioSec = rand.Intn(101)
+		rtd.info1s.DiskUsageRatioSec = rand.Intn(101)
+		rtd.mutex.Unlock()
 
+		realTimeDataTransfer <- rtd.info1s
 		time.Sleep(transferGap)
 	}
 }
