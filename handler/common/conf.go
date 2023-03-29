@@ -5,7 +5,7 @@
 
 package common
 
-var (
+const (
 	// MaxSearchHours 一次最多查询的小时数（7天）
 	MaxSearchHours = 7 * 24
 

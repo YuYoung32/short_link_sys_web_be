@@ -9,6 +9,7 @@ type Details struct {
 	ShortLink  string `json:"shortLink"`
 	LongLink   string `json:"longLink"`
 	CreateTime string `json:"createTime"`
+	Comment    string `json:"comment"`
 }
 
 type Amount int
