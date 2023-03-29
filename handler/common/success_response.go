@@ -16,7 +16,7 @@ type MsgResponse struct {
 
 func SuccessGeneralResp(ctx *gin.Context) {
 	msg := "ok"
-	ctx.JSON(http.StatusBadRequest, MsgResponse{
+	ctx.JSON(http.StatusOK, MsgResponse{
 		Msg: msg,
 	})
 }

@@ -31,7 +31,8 @@ func LinkRouter(engine *gin.Engine) {
 	group := engine.Group("/link")
 	group.GET("/details", link.DetailsListHandler)
 	group.POST("/add", link.AddLinkHandler)
-	group.GET("/del", link.DelLinkHandler)
+	group.POST("/del", link.DelLinkHandler)
+	group.POST("/update", link.UpdateLinkHandler)
 	group.GET("/amountTotal", link.AmountTotalHandler)
 }
 

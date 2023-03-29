@@ -12,8 +12,6 @@ type Details struct {
 	Comment    string `json:"comment"`
 }
 
-type Amount int
-
 type AmountTotal struct {
-	Amount Amount `json:"amountTotal"`
+	Amount int `json:"amountTotal"`
 }

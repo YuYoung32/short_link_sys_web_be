@@ -138,7 +138,6 @@ func parseTimeOrBadResponse(ctx *gin.Context) (error, time.Time, time.Time) {
 // AmountListHandler 获取指定时间段的访问量, 同天返回24小时, 其余分天
 func AmountListHandler(ctx *gin.Context) {
 	ctx.Set("module", "amount_list_handler")
-
 	err, beginTime, endTime := parseTimeOrBadResponse(ctx)
 	if err != nil {
 		return
