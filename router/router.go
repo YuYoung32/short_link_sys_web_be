@@ -24,7 +24,7 @@ func VisitRouter(engine *gin.Engine) {
 	group := engine.Group("/visit")
 	group.GET("/amount", visit.AmountListHandler)
 	group.GET("/ip", visit.IPListHandler)
-	group.GET("/details", visit.DetailsListHandler)
+	group.POST("/details", visit.DetailsListHandler)
 }
 
 func LinkRouter(engine *gin.Engine) {

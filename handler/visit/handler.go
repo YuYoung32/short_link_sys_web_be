@@ -1,6 +1,6 @@
 /**
  * Created by YuYoung on 2023/3/22
- * Description:
+ * Description: 访问相关的 handler
  */
 
 package visit
@@ -12,11 +12,15 @@ import (
 	"github.com/gin-gonic/gin"
 	"math/rand"
 	"net/http"
+	"short_link_sys_web_be/database"
 	. "short_link_sys_web_be/handler/common"
 	"short_link_sys_web_be/log"
 	"strconv"
+	"strings"
 	"time"
 )
+
+const OneDaySub1Sec = 24*time.Hour - time.Second
 
 var (
 	//go:embed province_code.json
@@ -44,16 +48,16 @@ func init() {
 	}
 }
 
-func testDayVADataGenerator(day time.Time) AmountTime {
-	var amountTime AmountTime
+func testDayVADataGenerator(day time.Time) AmountTimeResponse {
+	var amountTime AmountTimeResponse
 	for i := 0; i < 24; i++ {
 		amountTime.Amount = append(amountTime.Amount, day.Day()+i)
 	}
 	return amountTime
 }
 
-func testBetweenVADataGenerator(begin time.Time, end time.Time) AmountTime {
-	var amountTime AmountTime
+func testBetweenVADataGenerator(begin time.Time, end time.Time) AmountTimeResponse {
+	var amountTime AmountTimeResponse
 	for i := begin.Day(); i <= end.Day(); i++ {
 		amountTime.Amount = append(amountTime.Amount, i)
 	}
@@ -76,13 +80,13 @@ func getRandArr() []int {
 	return arr
 }
 
-func testDayIPDataGenerator(day time.Time) []IPSource {
+func testDayIPDataGenerator(day time.Time) []IPSourceResponse {
 	provinceList := getRandArr()
 	amountList := getRandArr()
 
-	var ipSource []IPSource
+	var ipSource []IPSourceResponse
 	for i := 0; i < day.Day(); i++ {
-		ipSource = append(ipSource, IPSource{
+		ipSource = append(ipSource, IPSourceResponse{
 			Region: ProvinceList[provinceList[i]],
 			Amount: amountList[i] + 1,
 		})
@@ -90,33 +94,18 @@ func testDayIPDataGenerator(day time.Time) []IPSource {
 	return ipSource
 }
 
-func testBetweenIPDataGenerator(begin time.Time, end time.Time) []IPSource {
+func testBetweenIPDataGenerator(begin time.Time, end time.Time) []IPSourceResponse {
 	provinceList := getRandArr()
 	amountList := getRandArr()
 
-	var ipSource []IPSource
+	var ipSource []IPSourceResponse
 	for i := begin.Day(); i <= end.Day(); i++ {
-		ipSource = append(ipSource, IPSource{
+		ipSource = append(ipSource, IPSourceResponse{
 			Region: ProvinceList[provinceList[i]],
 			Amount: amountList[i] + 1,
 		})
 	}
 	return ipSource
-}
-
-func testDetailsListDataGenerator() []Details {
-	var detailsList []Details
-	for i := 0; i < 10; i++ {
-		detailsList = append(detailsList, Details{
-			LongUrl:   "https://www.baidu.com/",
-			ShortUrl:  "sdvser",
-			IP:        "",
-			Region:    "浙江",
-			OS:        "Windows",
-			Timestamp: "1679555628",
-		})
-	}
-	return detailsList
 }
 
 func parseTimeOrBadResponse(ctx *gin.Context) (error, time.Time, time.Time) {
@@ -169,17 +158,104 @@ func IPListHandler(ctx *gin.Context) {
 	}
 }
 
+func checkAndReplaceIPStr(ip []string) ([]string, error) {
+	for i, item := range ip {
+		ipNums := strings.Split(item, ".")
+		if len(ipNums) != 4 {
+			return []string{}, errors.New("invalid ip address")
+		}
+		for j, ipNum := range ipNums {
+			if num, err := strconv.Atoi(ipNum); err != nil {
+				ipNums[j] = "%"
+			} else {
+				if num < 0 || num > 255 {
+					return []string{}, errors.New("invalid ip address")
+				}
+			}
+		}
+		ip[i] = strings.Join(ipNums, ".")
+	}
+	return ip, nil
+}
+
 func DetailsListHandler(ctx *gin.Context) {
 	ctx.Set("module", "details_list_handler")
-	amount := ctx.Query("amount")
-	if amount == "" {
-		ErrMissArgsResp(ctx)
-		return
+	db := database.GetDBInstance()
+
+	//region 获取POST body参数
+	type QueryDetailsBind struct {
+		ShortLink []string `json:"shortLink"`
+		LongLink  []string `json:"longLink"`
+		Comment   []string `json:"comment"`
+		Region    []string `json:"region"`
+		IP        []string `json:"ip"`
+		RangeTime []string `json:"rangeTime"`
 	}
-	intAmount, err := strconv.Atoi(amount)
-	if err != nil || intAmount <= 0 || intAmount > MaxSearchAmount {
+	queryDetailsBind := QueryDetailsBind{}
+	if err := ctx.ShouldBind(&queryDetailsBind); err != nil {
 		ErrInvalidArgsResp(ctx)
 		return
 	}
-	ctx.JSON(http.StatusOK, testDetailsListDataGenerator())
+	//endregion
+
+	//region 构造查询条件
+	// 内部为同一字段的OR查询, 外部为不同字段的AND查询
+	var queryTemplateList []string
+	var queryArgsList []interface{}
+
+	// 一个简单的封装, 构造like查询, 多个like之间使用OR连接, 外部加上()
+	buildLikeQuery := func(args []string, str string) {
+		if len(args) < 1 {
+			return
+		}
+		var queryTemplateOr []string
+		for _, arg := range args {
+			queryArgsList = append(queryArgsList, "%"+arg+"%")
+			queryTemplateOr = append(queryTemplateOr, str)
+		}
+
+		queryTemplateList = append(queryTemplateList, "("+strings.Join(queryTemplateOr, " or ")+")")
+	}
+	buildLikeQuery(queryDetailsBind.ShortLink, "short_link like (?)")
+	buildLikeQuery(queryDetailsBind.LongLink, "long_link like (?)")
+	buildLikeQuery(queryDetailsBind.Comment, "comment like (?)")
+
+	if len(queryDetailsBind.Region) > 0 {
+		queryTemplateList = append(queryTemplateList, "region in (?)")
+		queryArgsList = append(queryArgsList, queryDetailsBind.Region)
+	}
+
+	if newIPs, err := checkAndReplaceIPStr(queryDetailsBind.IP); err == nil && len(newIPs) > 0 {
+		var queryTemplateOr []string
+		for _, ip := range newIPs {
+			queryArgsList = append(queryArgsList, ip)
+			queryTemplateOr = append(queryTemplateOr, "ip like (?)")
+		}
+		queryTemplateList = append(queryTemplateList, "("+strings.Join(queryTemplateOr, " or ")+")")
+	} else if err != nil {
+		ErrInvalidArgsResp(ctx)
+		return
+	}
+
+	if len(queryDetailsBind.RangeTime) == 2 {
+		beginTime, err := time.Parse("20060102", queryDetailsBind.RangeTime[0])
+		endTime, err := time.Parse("20060102", queryDetailsBind.RangeTime[1])
+		if err != nil {
+			ErrInvalidArgsResp(ctx)
+			return
+		}
+		begin := beginTime.Unix()
+		end := time.Unix(endTime.Unix(), 0).Add(OneDaySub1Sec).Unix()
+		queryArgsList = append(queryArgsList, begin, end)
+		queryTemplateList = append(queryTemplateList, "visit_time between (?) and (?)")
+	} else if len(queryDetailsBind.RangeTime) != 0 {
+		ErrInvalidArgsResp(ctx)
+		return
+	}
+	//endregion
+
+	var resp []DetailsResponse
+	db.Where(strings.Join(queryTemplateList, " and "), queryArgsList...).Find(&resp)
+	ctx.JSON(http.StatusOK, resp)
+
 }

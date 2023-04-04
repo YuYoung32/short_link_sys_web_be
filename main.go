@@ -7,6 +7,7 @@ package main
 
 import (
 	"github.com/gin-gonic/gin"
+	_ "short_link_sys_web_be/database"
 	"short_link_sys_web_be/log"
 	"short_link_sys_web_be/middleware"
 	"short_link_sys_web_be/router"
