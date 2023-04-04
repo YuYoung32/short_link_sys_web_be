@@ -7,8 +7,6 @@ package visit
 
 import "short_link_sys_web_be/database"
 
-type DetailsResponse = database.Details
-
 type IPSourceResponse struct {
 	Region string `json:"region"`
 	Amount int    `json:"amount"`
@@ -16,4 +14,13 @@ type IPSourceResponse struct {
 
 type AmountTimeResponse struct {
 	Amount []int `json:"amount"`
+}
+
+type DetailsListResponse struct {
+	VisitDetails       []database.Details `json:"visitDetails"`
+	VisitDetailsAmount int64              `json:"visitDetailsAmount"`
+}
+
+type AmountResponse struct {
+	Amount int `json:"amount"`
 }

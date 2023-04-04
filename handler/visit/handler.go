@@ -58,7 +58,7 @@ func testDayVADataGenerator(day time.Time) AmountTimeResponse {
 
 func testBetweenVADataGenerator(begin time.Time, end time.Time) AmountTimeResponse {
 	var amountTime AmountTimeResponse
-	for i := begin.Day(); i <= end.Day(); i++ {
+	for i := 0; i <= int(end.Sub(begin).Hours()/24); i++ {
 		amountTime.Amount = append(amountTime.Amount, i)
 	}
 	return amountTime
@@ -108,16 +108,17 @@ func testBetweenIPDataGenerator(begin time.Time, end time.Time) []IPSourceRespon
 	return ipSource
 }
 
+// parseTimeOrBadResponse 解析时间参数begin和end 如果参数错误(任意一个为空或begin>end或end>=今天)则返回错误和响应HTTP 400
 func parseTimeOrBadResponse(ctx *gin.Context) (error, time.Time, time.Time) {
 	begin := ctx.Query("begin")
 	end := ctx.Query("end")
-	beginTime, err := time.Parse("20060102", begin)
-	endTime, err := time.Parse("20060102", end)
 	if begin == "" || end == "" {
 		ErrMissArgsResp(ctx)
-		return errors.New(""), beginTime, endTime
+		return errors.New(""), time.Time{}, time.Time{}
 	}
-	if err != nil || beginTime.After(endTime) || endTime.Day() >= time.Now().Day() {
+	beginTime, beginErr := time.Parse("20060102", begin)
+	endTime, endErr := time.Parse("20060102", end)
+	if beginErr != nil || endErr != nil || beginTime.After(endTime) || endTime.After(time.Now()) {
 		ErrInvalidArgsResp(ctx)
 		return errors.New(""), beginTime, endTime
 	}
@@ -138,12 +139,52 @@ func AmountListHandler(ctx *gin.Context) {
 	}
 }
 
+// AmountTotalHandler 获取指定时间段的访问量总和
+func AmountTotalHandler(ctx *gin.Context) {
+	ctx.Set("module", "amount_total_handler")
+	begin := ctx.Query("begin")
+	end := ctx.Query("end")
+	var beginTimestamp, endTimestamp int64
+	yesterday := time.Now().AddDate(0, 0, -1)
+	endTimestamp = time.Date(yesterday.Year(), yesterday.Month(), yesterday.Day(), 23, 59, 59, 0, time.Local).Unix()
+	if begin != "" {
+		if beginTime, beginErr := time.Parse("20060102", begin); beginErr == nil {
+			beginTimestamp = beginTime.Unix()
+		} else {
+			ErrInvalidArgsResp(ctx)
+			return
+		}
+	}
+	if end != "" {
+		if endTime, endErr := time.Parse("20060102", end); endErr == nil {
+			tmpEndTimestamp := time.Unix(endTime.Unix(), 0).Add(OneDaySub1Sec).Unix()
+			if tmpEndTimestamp > endTimestamp {
+				ErrInvalidArgsResp(ctx)
+				return
+			}
+			endTimestamp = tmpEndTimestamp
+		} else {
+			ErrInvalidArgsResp(ctx)
+			return
+		}
+	}
+	if beginTimestamp >= endTimestamp {
+		ErrInvalidArgsResp(ctx)
+		return
+	}
+	ctx.JSON(http.StatusOK, AmountResponse{
+		Amount: int(endTimestamp - beginTimestamp),
+	})
+
+}
+
 /*
+IPListHandler
 IP地址查询方法
+
 	https://ip.taobao.com/instructions
 	http://ip.taobao.com/outGetIpInfo?ips=8.8.8.8&accessKey=alibaba-inc
 */
-
 func IPListHandler(ctx *gin.Context) {
 	ctx.Set("module", "ip_list_handler")
 
@@ -254,8 +295,7 @@ func DetailsListHandler(ctx *gin.Context) {
 	}
 	//endregion
 
-	var resp []DetailsResponse
-	db.Where(strings.Join(queryTemplateList, " and "), queryArgsList...).Find(&resp)
+	var resp DetailsListResponse
+	db.Where(strings.Join(queryTemplateList, " and "), queryArgsList...).Find(&resp.VisitDetails).Count(&resp.VisitDetailsAmount)
 	ctx.JSON(http.StatusOK, resp)
-
 }

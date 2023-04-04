@@ -23,6 +23,7 @@ func ServerRouter(engine *gin.Engine) {
 func VisitRouter(engine *gin.Engine) {
 	group := engine.Group("/visit")
 	group.GET("/amount", visit.AmountListHandler)
+	group.GET("/amountTotal", visit.AmountTotalHandler)
 	group.GET("/ip", visit.IPListHandler)
 	group.POST("/details", visit.DetailsListHandler)
 }
