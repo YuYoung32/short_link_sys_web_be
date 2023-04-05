@@ -7,140 +7,125 @@ package link
 
 import (
 	"github.com/gin-gonic/gin"
-	"math/rand"
 	"net/http"
+	"short_link_sys_web_be/database"
 	. "short_link_sys_web_be/handler/common"
 	"strconv"
 	"strings"
-	"time"
 )
-
-const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-
-var detailsStore []Details
-
-func init() {
-	for i := 0; i < MaxSearchAmount; i++ {
-		detailsStore = append(detailsStore, Details{
-			ShortLink:  RandomString(5) + strconv.Itoa(i),
-			LongLink:   "https://baidu.com",
-			CreateTime: strconv.FormatInt(time.Now().Unix(), 10),
-			Comment:    "无",
-		})
-	}
-}
-
-func RandomString(length int) string {
-	rand.Seed(time.Now().UnixNano())
-
-	b := make([]byte, length)
-	for i := range b {
-		b[i] = letterBytes[rand.Intn(len(letterBytes))]
-	}
-
-	return string(b)
-}
 
 func DetailsListHandler(ctx *gin.Context) {
 	ctx.Set("module", "details_handler")
-	strSize := ctx.Query("amount")
-	strKeyword := ctx.Query("keyword")
-	// 必须指定数量
-	if strSize == "" {
+	db := database.GetDBInstance()
+
+	var intSize int
+	var queryTemplateList []string
+	var queryArgsList []interface{}
+
+	if strSize := ctx.Query("amount"); strSize == "" {
 		ErrMissArgsResp(ctx)
 		return
-	}
-	intSize, err := strconv.Atoi(strSize)
-	if err != nil || intSize > MaxSearchAmount {
-		ErrInvalidArgsResp(ctx)
-		return
-	}
-	if intSize < 0 {
-		intSize = MaxSearchAmount
-	}
-
-	var details []Details
-
-	if strKeyword == "" {
-		for i := 0; i < len(detailsStore) && len(details) < intSize; i++ {
-			details = append(details, detailsStore[i])
-		}
 	} else {
-		for i := 0; i < len(detailsStore) && len(details) < intSize; i++ {
-			if strings.Contains(detailsStore[i].LongLink, strKeyword) || strings.Contains(detailsStore[i].ShortLink, strKeyword) {
-				details = append(details, detailsStore[i])
-			}
+		var err error
+		if intSize, err = strconv.Atoi(strSize); err != nil || intSize > MaxSearchAmount {
+			ErrInvalidArgsResp(ctx)
+			return
+		}
+		if intSize < 0 {
+			intSize = MaxSearchAmount
 		}
 	}
+	if shortLink := ctx.Query("shortLink"); shortLink != "" {
+		queryTemplateList = append(queryTemplateList, "short_link like (?)")
+		queryArgsList = append(queryArgsList, "%"+shortLink+"%")
+	}
+	if longLink := ctx.Query("longLink"); longLink != "" {
+		queryTemplateList = append(queryTemplateList, "long_link like (?)")
+		queryArgsList = append(queryArgsList, "%"+longLink+"%")
+	}
+	if comment := ctx.Query("comment"); comment != "" {
+		queryTemplateList = append(queryTemplateList, "comment like (?)")
+		queryArgsList = append(queryArgsList, "%"+comment+"%")
+	}
 
+	var details DetailsListResponse
+	db.Where(strings.Join(queryTemplateList, " or "), queryArgsList...).Count(&details.LinksTotal)
+	db.Where(strings.Join(queryTemplateList, " or "), queryArgsList...).Limit(intSize).Find(&details.Links)
 	ctx.JSON(http.StatusOK, details)
 }
 
 func AddLinkHandler(ctx *gin.Context) {
 	ctx.Set("module", "add_link_handler")
-	var addLinkList []struct {
+	db := database.GetDBInstance()
+
+	var queryAddListBind []struct {
 		LongLink string `json:"longLink"`
 		Comment  string `json:"comment"`
 	}
-	time.Sleep(1 * time.Second)
-	if err := ctx.BindJSON(&addLinkList); err != nil {
+	if err := ctx.BindJSON(&queryAddListBind); err != nil {
 		ErrInvalidArgsResp(ctx)
 		return
 	}
-	for i, link := range addLinkList {
-		detailsStore = append(detailsStore, Details{
-			ShortLink:  RandomString(5) + strconv.Itoa(i),
-			LongLink:   link.LongLink,
-			CreateTime: strconv.FormatInt(time.Now().Unix(), 10),
-			Comment:    link.Comment,
-		})
 
+	var detailsStore []database.Link
+	for i, link := range queryAddListBind {
+		detailsStore = append(detailsStore, database.Link{
+			ShortLink: database.RandomString(5) + strconv.Itoa(i),
+			LongLink:  link.LongLink,
+			Comment:   link.Comment,
+		})
 	}
+
+	db.Create(&detailsStore)
 	SuccessGeneralResp(ctx)
 }
 
 func DelLinkHandler(ctx *gin.Context) {
 	ctx.Set("module", "del_link_handler")
-	var shortLinks struct {
+	db := database.GetDBInstance()
+
+	var queryDelListBind struct {
 		ShortLinks []string `json:"shortLinks"`
 	}
-	if err := ctx.BindJSON(&shortLinks); err != nil {
+	if err := ctx.BindJSON(&queryDelListBind); err != nil {
 		ErrInvalidArgsResp(ctx)
 		return
 	}
-	for _, shortLink := range shortLinks.ShortLinks {
-		for i, detail := range detailsStore {
-			if detail.ShortLink == shortLink {
-				detailsStore = append(detailsStore[:i], detailsStore[i+1:]...)
-			}
-		}
+	for _, shortLink := range queryDelListBind.ShortLinks {
+		db.Delete(&database.Link{}, "short_link = ?", shortLink)
 	}
 	SuccessGeneralResp(ctx)
 }
 
 func UpdateLinkHandler(ctx *gin.Context) {
 	ctx.Set("module", "update_link_handler")
-	var updateLink struct {
+	db := database.GetDBInstance()
+
+	var queryUpdateListBind struct {
 		ShortLink string `json:"shortLink"`
 		LongLink  string `json:"longLink"`
 		Comment   string `json:"comment"`
 	}
-	if err := ctx.BindJSON(&updateLink); err != nil {
+	if err := ctx.BindJSON(&queryUpdateListBind); err != nil {
 		ErrInvalidArgsResp(ctx)
 		return
 	}
-	for i, detail := range detailsStore {
-		if detail.ShortLink == updateLink.ShortLink {
-			detailsStore[i].LongLink = updateLink.LongLink
-			detailsStore[i].Comment = updateLink.Comment
-		}
-	}
+
+	var link database.Link
+	link.ShortLink = queryUpdateListBind.ShortLink
+	db.First(&link)
+	link.ShortLink = database.RandomString(5)
+	link.LongLink = queryUpdateListBind.LongLink
+	link.Comment = queryUpdateListBind.Comment
+	db.Create(&link)
 	SuccessGeneralResp(ctx)
 }
 
 func AmountTotalHandler(ctx *gin.Context) {
 	ctx.Set("module", "get_total_amount_handler")
-	ctx.JSON(http.StatusOK, AmountTotal{
-		Amount: len(detailsStore),
-	})
+	db := database.GetDBInstance()
+
+	var amount AmountTotal
+	db.Model(&database.Link{}).Count(&amount.Amount)
+	ctx.JSON(http.StatusOK, amount)
 }

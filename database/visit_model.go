@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-type Details struct {
+type Visit struct {
 	ShortLink string `json:"shortLink" gorm:"primaryKey"`
 	LongLink  string `json:"longLink"`
 	Comment   string `json:"comment"`
@@ -22,16 +22,16 @@ type Details struct {
 }
 
 func autoMigrateVisitModel(db *gorm.DB) {
-	err := db.AutoMigrate(&Details{})
+	err := db.AutoMigrate(&Visit{})
 	if err != nil {
 		log.MainLogger.WithField("module", "database").Error("auto migrate failed: " + err.Error())
 	}
 }
 
-func testDetailsDataGenerator() []Details {
-	var detailsList []Details
+func testVisitDataGenerator() []Visit {
+	var detailsList []Visit
 	for i := 0; i < 10; i++ {
-		detailsList = append(detailsList, Details{
+		detailsList = append(detailsList, Visit{
 			ShortLink: "test" + strconv.Itoa(i),
 			LongLink:  "test" + strconv.Itoa(i),
 			Comment:   "test" + strconv.Itoa(i),

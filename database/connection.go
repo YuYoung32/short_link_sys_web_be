@@ -47,11 +47,14 @@ func GetDBInstance() *gorm.DB {
 func autoMigrate() {
 	db := GetDBInstance()
 	autoMigrateVisitModel(db)
+	autoMigrateLinkModel(db)
 }
 
 // TODO 生成测试数据 删除
 func generateTestData() {
 	db := GetDBInstance()
-	detailsList := testDetailsDataGenerator()
-	db.Create(&detailsList)
+	visitList := testVisitDataGenerator()
+	db.Create(&visitList)
+	linkList := testLinkDataGenerator()
+	db.Create(&linkList)
 }

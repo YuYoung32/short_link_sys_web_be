@@ -17,8 +17,8 @@ type AmountTimeResponse struct {
 }
 
 type DetailsListResponse struct {
-	VisitDetails       []database.Details `json:"visitDetails"`
-	VisitDetailsAmount int64              `json:"visitDetailsAmount"`
+	VisitDetails       []database.Visit `json:"visitDetails"`
+	VisitDetailsAmount int64            `json:"visitDetailsAmount"`
 }
 
 type AmountResponse struct {
