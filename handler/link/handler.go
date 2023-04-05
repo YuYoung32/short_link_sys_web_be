@@ -49,7 +49,7 @@ func DetailsListHandler(ctx *gin.Context) {
 	}
 
 	var details DetailsListResponse
-	db.Where(strings.Join(queryTemplateList, " or "), queryArgsList...).Count(&details.LinksTotal)
+	db.Model(&database.Link{}).Where(strings.Join(queryTemplateList, " or "), queryArgsList...).Count(&details.LinksTotal)
 	db.Where(strings.Join(queryTemplateList, " or "), queryArgsList...).Limit(intSize).Find(&details.Links)
 	ctx.JSON(http.StatusOK, details)
 }
