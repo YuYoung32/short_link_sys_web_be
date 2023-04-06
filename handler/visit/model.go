@@ -12,10 +12,6 @@ type IPSourceResponse struct {
 	Amount int    `json:"amount"`
 }
 
-type AmountTimeResponse struct {
-	Amount []int `json:"amount"`
-}
-
 type DetailsListResponse struct {
 	VisitDetails       []database.Visit `json:"visitDetails"`
 	VisitDetailsAmount int64            `json:"visitDetailsAmount"`
@@ -23,4 +19,9 @@ type DetailsListResponse struct {
 
 type AmountResponse struct {
 	Amount int `json:"amount"`
+}
+
+type StaticsListResponse struct {
+	VisitAmountList []int64 `json:"visitAmount"`
+	IPAmountList    []int64 `json:"ipAmount"`
 }
