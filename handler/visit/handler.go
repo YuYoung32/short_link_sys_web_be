@@ -79,30 +79,14 @@ func getRandArr() []int {
 	return arr
 }
 
-func testDayIPDataGenerator() []IPSourceResponse {
+func testDayIPDataGenerator() IPSourceResponse {
 	provinceList := getRandArr()
 	amountList := getRandArr()
 
-	var ipSource []IPSourceResponse
+	var ipSource IPSourceResponse
 	for i := 0; i < 10; i++ {
-		ipSource = append(ipSource, IPSourceResponse{
-			Region: ProvinceList[provinceList[i]],
-			Amount: amountList[i] + 1,
-		})
-	}
-	return ipSource
-}
-
-func testBetweenIPDataGenerator() []IPSourceResponse {
-	provinceList := getRandArr()
-	amountList := getRandArr()
-
-	var ipSource []IPSourceResponse
-	for i := 0; i <= 10; i++ {
-		ipSource = append(ipSource, IPSourceResponse{
-			Region: ProvinceList[provinceList[i]],
-			Amount: amountList[i] + 1,
-		})
+		ipSource.Amount = append(ipSource.Amount, amountList[i]+1)
+		ipSource.Region = append(ipSource.Region, ProvinceList[provinceList[i]])
 	}
 	return ipSource
 }
@@ -151,14 +135,10 @@ IP地址查询方法
 func IPListHandler(ctx *gin.Context) {
 	ctx.Set("module", "ip_list_handler")
 
-	begin, end, err := utils.ConvertAndCheckTimeGroup(ctx.Query("begin"), ctx.Query("end"))
+	_, _, err := utils.ConvertAndCheckTimeGroup(ctx.Query("begin"), ctx.Query("end"))
 	if err != nil {
 		common.ErrInvalidArgsResp(ctx)
 		return
 	}
-	if begin == end {
-		ctx.JSON(http.StatusOK, testDayIPDataGenerator())
-	} else {
-		ctx.JSON(http.StatusOK, testBetweenIPDataGenerator())
-	}
+	ctx.JSON(http.StatusOK, testDayIPDataGenerator())
 }

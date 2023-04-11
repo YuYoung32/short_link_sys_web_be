@@ -17,7 +17,6 @@ func ServerRouter(engine *gin.Engine) {
 	group.GET("/info1S", server.RealtimeDataHandler)
 	group.GET("/info1Min", server.Info1MinListHandler)
 	group.GET("/staticInfo", server.StaticInfoHandler)
-	group.GET("/infoXhr", server.InfoXhrListHandler)
 }
 
 func VisitRouter(engine *gin.Engine) {

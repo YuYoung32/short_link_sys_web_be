@@ -8,8 +8,8 @@ package visit
 import "short_link_sys_web_be/database"
 
 type IPSourceResponse struct {
-	Region string `json:"region"`
-	Amount int    `json:"amount"`
+	Region []string `json:"region"`
+	Amount []int    `json:"amount"`
 }
 
 type DetailsListResponse struct {
