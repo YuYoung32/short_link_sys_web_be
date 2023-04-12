@@ -8,8 +8,6 @@ package database
 import (
 	"gorm.io/gorm"
 	"short_link_sys_web_be/log"
-	"strconv"
-	"time"
 )
 
 type Visit struct {
@@ -26,19 +24,4 @@ func autoMigrateVisitModel(db *gorm.DB) {
 	if err != nil {
 		log.MainLogger.WithField("module", "database").Error("auto migrate failed: " + err.Error())
 	}
-}
-
-func testVisitDataGenerator() []Visit {
-	var detailsList []Visit
-	for i := 0; i < 10; i++ {
-		detailsList = append(detailsList, Visit{
-			ShortLink: "test" + strconv.Itoa(i),
-			LongLink:  "test" + strconv.Itoa(i),
-			Comment:   "test" + strconv.Itoa(i),
-			IP:        "192.168.1.12",
-			Region:    "浙江",
-			VisitTime: time.Now().Unix(),
-		})
-	}
-	return detailsList
 }

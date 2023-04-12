@@ -6,8 +6,10 @@
 package database
 
 import (
-	"gorm.io/driver/sqlite"
+	"github.com/spf13/viper"
+	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	_ "short_link_sys_web_be/conf"
 	"short_link_sys_web_be/log"
 	"time"
 )
@@ -17,11 +19,18 @@ var db *gorm.DB
 func init() {
 	var err error
 	logger := log.MainLogger.WithField("module", "database_init")
-	db, err = gorm.Open(sqlite.Open("file::memory:?cache=shared"), &gorm.Config{})
+
+	var dsn = viper.GetString("mysql.username") + ":" +
+		viper.GetString("mysql.password") + "@tcp(" +
+		viper.GetString("mysql.host") + ":" +
+		viper.GetString("mysql.port") + ")/" +
+		viper.GetString("mysql.database")
+	db, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
 		logger.Error("failed to connect database: " + err.Error())
 		panic("failed to connect database")
 	}
+	logger.Info("connect database success")
 	sqlDB, err := db.DB()
 	if err != nil {
 		logger.Error("failed to get sqlDB: " + err.Error())
@@ -32,7 +41,6 @@ func init() {
 	sqlDB.SetConnMaxLifetime(time.Hour)
 
 	autoMigrate()
-	generateTestData()
 }
 
 // GetDBInstance 获取数据库实例, 其他包使用
@@ -48,13 +56,4 @@ func autoMigrate() {
 	db := GetDBInstance()
 	autoMigrateVisitModel(db)
 	autoMigrateLinkModel(db)
-}
-
-// TODO 生成测试数据 删除
-func generateTestData() {
-	db := GetDBInstance()
-	visitList := testVisitDataGenerator()
-	db.Create(&visitList)
-	linkList := testLinkDataGenerator()
-	db.Create(&linkList)
 }

@@ -5,3 +5,5 @@ tmp
 *.exe
 
 .air.toml
+
+conf/config.yaml

@@ -9,7 +9,6 @@ import (
 	"gorm.io/gorm"
 	"math/rand"
 	"short_link_sys_web_be/log"
-	"strconv"
 	"time"
 )
 
@@ -36,17 +35,4 @@ func RandomString(length int) string {
 		b[i] = letterBytes[rand.Intn(len(letterBytes))]
 	}
 	return string(b)
-}
-
-func testLinkDataGenerator() []Link {
-	var detailsStore []Link
-	for i := 0; i < 100; i++ {
-		detailsStore = append(detailsStore, Link{
-			ShortLink:  RandomString(5) + strconv.Itoa(i),
-			LongLink:   "https://baidu.com",
-			CreateTime: time.Now().Unix(),
-			Comment:    "无",
-		})
-	}
-	return detailsStore
 }
