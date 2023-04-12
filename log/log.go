@@ -8,6 +8,7 @@ package log
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
+	"github.com/spf13/viper"
 	"os"
 	"time"
 )
@@ -17,21 +18,8 @@ var (
 	MainLogger = logrus.New()
 )
 
-type TempLogConf struct {
-	Level   string `json:"level"`
-	DicPath string `json:"file_path"`
-}
-
-func GetLogConf() TempLogConf {
-	return TempLogConf{
-		Level:   "debug",
-		DicPath: "log/",
-	}
-}
-
 // 配置Logrus
 func init() {
-	logConf := GetLogConf()
 	level := map[string]logrus.Level{
 		"debug": logrus.DebugLevel,
 		"info":  logrus.InfoLevel,
@@ -40,7 +28,7 @@ func init() {
 		"fatal": logrus.FatalLevel,
 		"panic": logrus.PanicLevel,
 	}
-	MainLogger.SetLevel(level[logConf.Level])
+	MainLogger.SetLevel(level[viper.GetString("log.level")])
 
 	MainLogger.SetFormatter(&logrus.TextFormatter{
 		TimestampFormat: "2006-01-02 15:04:05",
@@ -56,7 +44,7 @@ func init() {
 	//MainLogger.SetOutput(io.MultiWriter(file, os.Stdout))
 	MainLogger.SetOutput(os.Stdout)
 
-	MainLogger.Info("Logrus init success")
+	MainLogger.WithField("module", "log").Info("Logrus init success")
 }
 
 // Middleware 日志中间件

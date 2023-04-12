@@ -36,9 +36,9 @@ func init() {
 		logger.Error("failed to get sqlDB: " + err.Error())
 		panic("failed to get sqlDB")
 	}
-	sqlDB.SetMaxIdleConns(10)
-	sqlDB.SetMaxOpenConns(100)
-	sqlDB.SetConnMaxLifetime(time.Hour)
+	sqlDB.SetMaxIdleConns(viper.GetInt("mysql.maxIdleConns"))
+	sqlDB.SetMaxOpenConns(viper.GetInt("mysql.maxOpenConns"))
+	sqlDB.SetConnMaxLifetime(time.Minute * time.Duration(viper.GetInt("mysql.connMaxLifetime")))
 
 	autoMigrate()
 }

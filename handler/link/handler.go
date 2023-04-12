@@ -70,7 +70,7 @@ func AddLinkHandler(ctx *gin.Context) {
 	var detailsStore []database.Link
 	for i, link := range queryAddListBind {
 		detailsStore = append(detailsStore, database.Link{
-			ShortLink: database.RandomString(5) + strconv.Itoa(i),
+			ShortLink: "sgews" + strconv.Itoa(i),
 			LongLink:  link.LongLink,
 			Comment:   link.Comment,
 		})
@@ -114,7 +114,7 @@ func UpdateLinkHandler(ctx *gin.Context) {
 	var link database.Link
 	link.ShortLink = queryUpdateListBind.ShortLink
 	db.First(&link)
-	link.ShortLink = database.RandomString(5)
+	link.ShortLink = "newsl"
 	link.LongLink = queryUpdateListBind.LongLink
 	link.Comment = queryUpdateListBind.Comment
 	db.Create(&link)

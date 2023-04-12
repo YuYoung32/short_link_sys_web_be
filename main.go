@@ -7,6 +7,7 @@ package main
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/spf13/viper"
 	"short_link_sys_web_be/log"
 	"short_link_sys_web_be/middleware"
 	"short_link_sys_web_be/router"
@@ -20,7 +21,8 @@ func main() {
 	engine.Use(middleware.CrosMiddleware)
 	router.LoadAllRouter(engine)
 
-	err := engine.Run(":8081")
+	runAddr := viper.GetString("server.host") + ":" + viper.GetString("server.port")
+	err := engine.Run(runAddr)
 	if err != nil {
 		moduleLogger.Error(err)
 		panic(err)
