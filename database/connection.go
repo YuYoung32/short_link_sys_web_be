@@ -54,6 +54,5 @@ func GetDBInstance() *gorm.DB {
 
 func autoMigrate() {
 	db := GetDBInstance()
-	autoMigrateVisitModel(db)
 	autoMigrateLinkModel(db)
 }

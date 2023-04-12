@@ -6,10 +6,22 @@
 package database
 
 import (
+	"math/rand"
 	"strconv"
 	"testing"
 	"time"
 )
+
+const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+
+func RandomString(length int) string {
+	rand.Seed(time.Now().UnixNano())
+	b := make([]byte, length)
+	for i := range b {
+		b[i] = letterBytes[rand.Intn(len(letterBytes))]
+	}
+	return string(b)
+}
 
 func linkDataGenerator() []Link {
 	var detailsStore []Link

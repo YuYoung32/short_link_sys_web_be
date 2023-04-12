@@ -7,9 +7,7 @@ package database
 
 import (
 	"gorm.io/gorm"
-	"math/rand"
 	"short_link_sys_web_be/log"
-	"time"
 )
 
 type Link struct {
@@ -24,15 +22,4 @@ func autoMigrateLinkModel(db *gorm.DB) {
 	if err != nil {
 		log.MainLogger.WithField("module", "database").Error("auto migrate failed: " + err.Error())
 	}
-}
-
-const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-
-func RandomString(length int) string {
-	rand.Seed(time.Now().UnixNano())
-	b := make([]byte, length)
-	for i := range b {
-		b[i] = letterBytes[rand.Intn(len(letterBytes))]
-	}
-	return string(b)
 }
