@@ -11,6 +11,5 @@ import (
 )
 
 func StaticInfoHandler(ctx *gin.Context) {
-	ctx.Set("func", "static_info_handler")
 	ctx.JSON(http.StatusOK, staticInfo)
 }

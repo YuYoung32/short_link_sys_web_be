@@ -20,6 +20,6 @@ type Link struct {
 func autoMigrateLinkModel(db *gorm.DB) {
 	err := db.AutoMigrate(&Link{})
 	if err != nil {
-		log.MainLogger.WithField("module", "database").Error("auto migrate failed: " + err.Error())
+		log.GetLogger().Error("auto migrate failed: " + err.Error())
 	}
 }

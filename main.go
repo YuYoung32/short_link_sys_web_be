@@ -22,11 +22,13 @@ func init() {
 	database.Init()
 	visit.Init()
 	server.Init()
-	log.MainLogger.WithField("module", "main").Info("all module has init")
+	log.GetLogger().Info("all module has init")
 }
 
 func main() {
-	moduleLogger := log.MainLogger.WithField("module", "main")
+	moduleLogger := log.GetLogger()
+
+	log.GetLogger().Info("start server")
 
 	engine := gin.New()
 	engine.Use(gin.LoggerWithWriter(log.MainLogger.Writer()))

@@ -27,7 +27,7 @@ var (
 )
 
 func Init() {
-	logger := log.MainLogger.WithField("module", "visit_handler_init")
+	logger := log.GetLogger()
 
 	var data []map[string]string
 	err := json.Unmarshal(provinceCodeFile, &data)

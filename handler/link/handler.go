@@ -15,7 +15,6 @@ import (
 )
 
 func DetailsListHandler(ctx *gin.Context) {
-	ctx.Set("module", "details_handler")
 	db := database.GetDBInstance()
 
 	var intSize int
@@ -55,7 +54,6 @@ func DetailsListHandler(ctx *gin.Context) {
 }
 
 func AddLinkHandler(ctx *gin.Context) {
-	ctx.Set("module", "add_link_handler")
 	db := database.GetDBInstance()
 
 	var queryAddListBind []struct {
@@ -98,7 +96,6 @@ func DelLinkHandler(ctx *gin.Context) {
 }
 
 func UpdateLinkHandler(ctx *gin.Context) {
-	ctx.Set("module", "update_link_handler")
 	db := database.GetDBInstance()
 
 	var queryUpdateListBind struct {
@@ -122,7 +119,6 @@ func UpdateLinkHandler(ctx *gin.Context) {
 }
 
 func AmountTotalHandler(ctx *gin.Context) {
-	ctx.Set("module", "get_total_amount_handler")
 	db := database.GetDBInstance()
 
 	var amount AmountTotal

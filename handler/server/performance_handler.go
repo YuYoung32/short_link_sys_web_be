@@ -45,7 +45,7 @@ func Init() {
 
 // fetchInfoFromCore 从转发服务器获取数据
 func fetchInfoFromCore() {
-	moduleLogger := log.MainLogger.WithField("func", "fetchInfoFromCore")
+	moduleLogger := log.GetLogger()
 
 	wsURL := "ws://" + conf.GlobalConfig.GetString("core.host") + ":" + conf.GlobalConfig.GetString("core.port") + "/"
 	moduleLogger.Info("wsURL", wsURL)
@@ -127,24 +127,23 @@ func pushAndPopArr(info1Min *Info1Min, data Info1s) {
 }
 
 func Info1MinListHandler(ctx *gin.Context) {
-	ctx.Set("func", "info_1_min_list_handler")
 	info1MinWrapper.mutex.Lock()
 	ctx.JSON(http.StatusOK, info1MinWrapper.info1Min)
 	info1MinWrapper.mutex.Unlock()
 }
 
 func RealtimeDataHandler(ctx *gin.Context) {
-	ModuleLogger := log.MainLogger.WithField("func", "realtime_data_handler")
+	moduleLogger := log.GetLogger()
 
 	conn, err := upgrader.Upgrade(ctx.Writer, ctx.Request, nil)
 	if err != nil {
-		ModuleLogger.Error(err)
+		moduleLogger.Error(err)
 		return
 	}
 	defer func(conn *websocket.Conn) {
 		err := conn.Close()
 		if err != nil {
-			ModuleLogger.Error(err)
+			moduleLogger.Error(err)
 		}
 	}(conn)
 
@@ -154,13 +153,14 @@ func RealtimeDataHandler(ctx *gin.Context) {
 		err = conn.WriteJSON(info1SWrapper.info1s)
 		info1SWrapper.mutex.Unlock()
 		if err != nil {
-			ModuleLogger.Error(err)
+			moduleLogger.Error(err)
 			return
 		}
 		time.Sleep(transferGap)
 	}
 }
 
+// TODO 删除
 // PrintFields 递归打印结构体中所有的字段和相应的值
 func PrintFields(v interface{}) {
 	val := reflect.ValueOf(v)

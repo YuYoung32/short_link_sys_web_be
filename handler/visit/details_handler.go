@@ -37,7 +37,6 @@ func checkAndReplaceIPStr(ip []string) ([]string, error) {
 }
 
 func DetailsListHandler(ctx *gin.Context) {
-	ctx.Set("module", "details_list_handler")
 	db := database.GetDBInstance()
 
 	//region 获取POST body参数
