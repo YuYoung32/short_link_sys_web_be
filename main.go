@@ -28,8 +28,6 @@ func init() {
 func main() {
 	moduleLogger := log.GetLogger()
 
-	log.GetLogger().Info("start server")
-
 	engine := gin.New()
 	engine.Use(gin.LoggerWithWriter(log.MainLogger.Writer()))
 	engine.Use(log.Middleware)
@@ -37,6 +35,7 @@ func main() {
 	router.LoadAllRouter(engine)
 
 	runAddr := conf.GlobalConfig.GetString("server.host") + ":" + conf.GlobalConfig.GetString("server.port")
+	log.GetLogger().Info("server listening on ", runAddr)
 	err := engine.Run(runAddr)
 	if err != nil {
 		moduleLogger.Error(err)

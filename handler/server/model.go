@@ -6,7 +6,8 @@
 package server
 
 type Info1s struct {
-	CPUUsageRatioSec int `json:"cpuUsageRatioLastSec"`
+	CPUUsageRatioSec int   `json:"cpuUsageRatioLastSec"`
+	CPURunningTime   int64 `json:"cpuRunningTime"`
 
 	MemUsageSec uint64 `json:"memUsageLastSec"`
 	MemAvailSec uint64 `json:"memAvailLastSec"`
@@ -37,7 +38,8 @@ type CPUStaticInfo struct {
 	CoreNum   int    `json:"coreNum"`
 	ThreadNum int    `json:"threadNum"`
 	CacheSize int    `json:"cacheSize"`
-	StartTime int    `json:"startTime"`
+	Speed     int    `json:"speed"`
+	StartTime int64  `json:"startTime"`
 }
 
 type MemStaticInfo struct {

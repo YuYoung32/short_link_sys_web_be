@@ -28,8 +28,6 @@ var (
 		info1s Info1s
 	}
 
-	transferGap = time.Duration(conf.GlobalConfig.GetInt64("handler.server.transferGap")) * time.Millisecond
-
 	upgrader = websocket.Upgrader{
 		CheckOrigin: func(r *http.Request) bool {
 			return true
@@ -100,7 +98,7 @@ func fetchInfoFromCore() {
 				info1MinWrapper.mutex.Unlock()
 				info1SWrapper.mutex.Unlock()
 
-				moduleLogger.Debug("info1s: ", string(dynamicInfoBytes))
+				//moduleLogger.Debug("info1s: ", string(dynamicInfoBytes))
 			}
 		}()
 	}()
@@ -130,8 +128,11 @@ func Info1MinListHandler(ctx *gin.Context) {
 	info1MinWrapper.mutex.Unlock()
 }
 
+// RealtimeDataHandler 实时数据传递给前端
 func RealtimeDataHandler(ctx *gin.Context) {
 	moduleLogger := log.GetLogger()
+
+	var transferGap = time.Duration(conf.GlobalConfig.GetInt64("handler.server.transferGap")) * time.Millisecond
 
 	conn, err := upgrader.Upgrade(ctx.Writer, ctx.Request, nil)
 	if err != nil {
@@ -148,6 +149,7 @@ func RealtimeDataHandler(ctx *gin.Context) {
 	// 每秒发送数据
 	for {
 		info1SWrapper.mutex.Lock()
+		info1SWrapper.info1s.CPURunningTime = time.Now().Unix() - staticInfo.CPUStaticInfo.StartTime
 		err = conn.WriteJSON(info1SWrapper.info1s)
 		info1SWrapper.mutex.Unlock()
 		if err != nil {
@@ -156,4 +158,9 @@ func RealtimeDataHandler(ctx *gin.Context) {
 		}
 		time.Sleep(transferGap)
 	}
+}
+
+// StaticInfoHandler 静态数据传递给前端
+func StaticInfoHandler(ctx *gin.Context) {
+	ctx.JSON(http.StatusOK, staticInfo)
 }
