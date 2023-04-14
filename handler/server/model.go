@@ -6,32 +6,30 @@
 package server
 
 type Info1s struct {
-	RunningTime      int `json:"runningTime"`
 	CPUUsageRatioSec int `json:"cpuUsageRatioLastSec"`
-	CPUFreqSec       int `json:"cpuFreqLastSec"`
 
-	MemUsageSec int `json:"memUsageLastSec"`
-	MemAvailSec int `json:"memAvailLastSec"`
-	SwapUsage   int `json:"swapUsageLastSec"`
+	MemUsageSec uint64 `json:"memUsageLastSec"`
+	MemAvailSec uint64 `json:"memAvailLastSec"`
+	SwapUsage   uint64 `json:"swapUsageLastSec"`
 
-	DiskReadSec  int `json:"diskReadLastSec"`
-	DiskWriteSec int `json:"diskWriteLastSec"`
-	DiskUsageSec int `json:"diskUsageLastSec"`
-	DiskAvailSec int `json:"diskAvailLastSec"`
+	DiskReadSec  uint64 `json:"diskReadLastSec"`
+	DiskWriteSec uint64 `json:"diskWriteLastSec"`
+	DiskUsageSec uint64 `json:"diskUsageLastSec"`
+	DiskAvailSec uint64 `json:"diskAvailLastSec"`
 
-	NetRecvSec int `json:"netRecvLastSec"`
-	NetSendSec int `json:"netSendLastSec"`
+	NetRecvSec uint64 `json:"netRecvLastSec"`
+	NetSendSec uint64 `json:"netSendLastSec"`
 
-	TTLSec int `json:"ttlLastSec"`
+	//TTLSec int `json:"ttlLastSec"`
 }
 
 type Info1Min struct {
-	CPUUsageRatioMin [60]int `json:"cpuUsageRatioLastMin"`
-	MemUsageMin      [60]int `json:"memUsageLastMin"`
-	DiskReadMin      [60]int `json:"diskReadLastMin"`
-	DiskWriteMin     [60]int `json:"diskWriteLastMin"`
-	NetRecvMin       [60]int `json:"netRecvLastMin"`
-	NetSendMin       [60]int `json:"netSendLastMin"`
+	CPUUsageRatioMin [60]int    `json:"cpuUsageRatioLastMin"`
+	MemUsageMin      [60]uint64 `json:"memUsageLastMin"`
+	DiskReadMin      [60]uint64 `json:"diskReadLastMin"`
+	DiskWriteMin     [60]uint64 `json:"diskWriteLastMin"`
+	NetRecvMin       [60]uint64 `json:"netRecvLastMin"`
+	NetSendMin       [60]uint64 `json:"netSendLastMin"`
 }
 
 type CPUStaticInfo struct {
@@ -39,6 +37,7 @@ type CPUStaticInfo struct {
 	CoreNum   int    `json:"coreNum"`
 	ThreadNum int    `json:"threadNum"`
 	CacheSize int    `json:"cacheSize"`
+	StartTime int    `json:"startTime"`
 }
 
 type MemStaticInfo struct {
