@@ -7,21 +7,34 @@ package main
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/spf13/viper"
+	"short_link_sys_web_be/conf"
+	"short_link_sys_web_be/database"
+	"short_link_sys_web_be/handler/server"
+	"short_link_sys_web_be/handler/visit"
 	"short_link_sys_web_be/log"
 	"short_link_sys_web_be/middleware"
 	"short_link_sys_web_be/router"
 )
 
+func init() {
+	conf.Init()
+	log.Init()
+	database.Init()
+	visit.Init()
+	server.Init()
+	log.MainLogger.WithField("module", "main").Info("all module has init")
+}
+
 func main() {
 	moduleLogger := log.MainLogger.WithField("module", "main")
 
 	engine := gin.New()
+	engine.Use(gin.LoggerWithWriter(log.MainLogger.Writer()))
 	engine.Use(log.Middleware)
 	engine.Use(middleware.CrosMiddleware)
 	router.LoadAllRouter(engine)
 
-	runAddr := viper.GetString("server.host") + ":" + viper.GetString("server.port")
+	runAddr := conf.GlobalConfig.GetString("server.host") + ":" + conf.GlobalConfig.GetString("server.port")
 	err := engine.Run(runAddr)
 	if err != nil {
 		moduleLogger.Error(err)

@@ -26,7 +26,7 @@ var (
 	CodeToProvince   = make(map[string]string)
 )
 
-func init() {
+func Init() {
 	logger := log.MainLogger.WithField("module", "visit_handler_init")
 
 	var data []map[string]string

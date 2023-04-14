@@ -8,8 +8,8 @@ package log
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
-	"github.com/spf13/viper"
 	"os"
+	"short_link_sys_web_be/conf"
 	"time"
 )
 
@@ -18,8 +18,8 @@ var (
 	MainLogger = logrus.New()
 )
 
-// 配置Logrus
-func init() {
+// Init 配置Logrus
+func Init() {
 	level := map[string]logrus.Level{
 		"debug": logrus.DebugLevel,
 		"info":  logrus.InfoLevel,
@@ -28,7 +28,7 @@ func init() {
 		"fatal": logrus.FatalLevel,
 		"panic": logrus.PanicLevel,
 	}
-	MainLogger.SetLevel(level[viper.GetString("log.level")])
+	MainLogger.SetLevel(level[conf.GlobalConfig.GetString("log.level")])
 
 	MainLogger.SetFormatter(&logrus.TextFormatter{
 		TimestampFormat: "2006-01-02 15:04:05",
