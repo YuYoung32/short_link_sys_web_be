@@ -7,11 +7,9 @@ package server
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"net/http"
-	"reflect"
 	"short_link_sys_web_be/conf"
 	"short_link_sys_web_be/log"
 	"sync"
@@ -48,7 +46,7 @@ func fetchInfoFromCore() {
 	moduleLogger := log.GetLogger()
 
 	wsURL := "ws://" + conf.GlobalConfig.GetString("core.host") + ":" + conf.GlobalConfig.GetString("core.port") + "/"
-	moduleLogger.Info("wsURL", wsURL)
+	moduleLogger.Debug("wsURL ", wsURL)
 	conn, _, err := websocket.DefaultDialer.Dial(wsURL, nil)
 	if err != nil {
 		moduleLogger.Error("dial ws failed: ", err)
@@ -57,12 +55,11 @@ func fetchInfoFromCore() {
 
 	// auth 验证
 	go func() {
-		for {
-			err := conn.WriteMessage(websocket.TextMessage, []byte(conf.GlobalConfig.GetString("core.auth")))
-			if err != nil {
-				moduleLogger.Error("write auth failed: ", err)
-				return
-			}
+		moduleLogger.Debug("lcoal auth: ", conf.GlobalConfig.GetString("core.authToken"))
+		err := conn.WriteMessage(websocket.TextMessage, []byte(conf.GlobalConfig.GetString("core.authToken")))
+		if err != nil {
+			moduleLogger.Error("write auth failed: ", err)
+			return
 		}
 	}()
 
@@ -83,7 +80,7 @@ func fetchInfoFromCore() {
 		if err != nil {
 			moduleLogger.Error("unmarshal static info1MinWrapper failed: ", err)
 		}
-		PrintFields(staticInfo)
+		moduleLogger.Debug("staticInfo: ", string(staticInfoBytes))
 
 		// 之后读取实时数据
 		go func() {
@@ -102,7 +99,8 @@ func fetchInfoFromCore() {
 				pushAndPopArr(&info1MinWrapper.info1Min, info1SWrapper.info1s)
 				info1MinWrapper.mutex.Unlock()
 				info1SWrapper.mutex.Unlock()
-				PrintFields(info1SWrapper.info1s)
+
+				moduleLogger.Debug("info1s: ", string(dynamicInfoBytes))
 			}
 		}()
 	}()
@@ -158,28 +156,4 @@ func RealtimeDataHandler(ctx *gin.Context) {
 		}
 		time.Sleep(transferGap)
 	}
-}
-
-// TODO 删除
-// PrintFields 递归打印结构体中所有的字段和相应的值
-func PrintFields(v interface{}) {
-	val := reflect.ValueOf(v)
-	if val.Kind() == reflect.Ptr {
-		val = val.Elem()
-	}
-
-	typ := val.Type()
-	for i := 0; i < val.NumField(); i++ {
-		field := val.Field(i)
-		fieldType := typ.Field(i)
-
-		// 如果该字段是结构体，则递归打印
-		if field.Kind() == reflect.Struct {
-			fmt.Printf("%s:\n", fieldType.Name)
-			PrintFields(field.Addr().Interface())
-		} else {
-			fmt.Printf("%s: %v\n", fieldType.Name, field.Interface())
-		}
-	}
-	fmt.Println()
 }
