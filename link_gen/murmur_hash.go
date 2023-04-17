@@ -7,9 +7,9 @@ package link_gen
 
 import "github.com/spaolacci/murmur3"
 
-type murmurHash struct{}
+type MurmurHash struct{}
 
-func (m murmurHash) GenLink(s string) string {
+func (m MurmurHash) GenLink(s string) string {
 	murmur3.New64()
 	hash := murmur3.Sum64([]byte(s))
 	return uint64ToShortLink(hash)

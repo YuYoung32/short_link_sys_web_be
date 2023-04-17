@@ -7,9 +7,9 @@ package link_gen
 
 var start = uint64(1000000000000000000)
 
-type autoIncrement struct{}
+type SimpleSequencer struct{}
 
-func (autoIncrement) GenLink(s string) string {
+func (SimpleSequencer) GenLink(s string) string {
 	start++
 	return uint64ToShortLink(start)
 }

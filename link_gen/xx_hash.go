@@ -7,9 +7,9 @@ package link_gen
 
 import "github.com/cespare/xxhash"
 
-type xxHash struct{}
+type XXHash struct{}
 
-func (xxHash) GenLink(s string) string {
+func (XXHash) GenLink(s string) string {
 	hash := xxhash.Sum64String(s)
 	return uint64ToShortLink(hash)
 }

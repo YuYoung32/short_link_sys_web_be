@@ -29,7 +29,7 @@ var testCases = []struct {
 }
 
 func TestMurmurHash(t *testing.T) {
-	var murmur murmurHash
+	var murmur MurmurHash
 	for _, testCase := range testCases {
 		l1 := murmur.GenLink(testCase.longLink)
 		l2 := murmur.GenLink(testCase.longLink)
@@ -42,7 +42,7 @@ func TestMurmurHash(t *testing.T) {
 }
 
 func TestXXHash(t *testing.T) {
-	var xx xxHash
+	var xx XXHash
 	for _, testCase := range testCases {
 		l1 := xx.GenLink(testCase.longLink)
 		l2 := xx.GenLink(testCase.longLink)
@@ -55,7 +55,7 @@ func TestXXHash(t *testing.T) {
 }
 
 func TestFNVHash(t *testing.T) {
-	var fnv fnvHash
+	var fnv FNVHash
 	for _, testCase := range testCases {
 		l1 := fnv.GenLink(testCase.longLink)
 		l2 := fnv.GenLink(testCase.longLink)
@@ -68,7 +68,7 @@ func TestFNVHash(t *testing.T) {
 }
 
 func TestSimpleSequencer(t *testing.T) {
-	var auto autoIncrement
+	var auto SimpleSequencer
 	for _, testCase := range testCases {
 		l1 := auto.GenLink(testCase.longLink)
 		l2 := auto.GenLink(testCase.longLink)
@@ -82,7 +82,7 @@ func TestSimpleSequencer(t *testing.T) {
 
 func TestSnowflakeSequencer(t *testing.T) {
 	SnowflakeInit()
-	var snow snowFlake
+	var snow SnowflakeSequencer
 	for _, testCase := range testCases {
 		l1 := snow.GenLink(testCase.longLink)
 		l2 := snow.GenLink(testCase.longLink)

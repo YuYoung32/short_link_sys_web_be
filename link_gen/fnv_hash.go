@@ -9,15 +9,15 @@ import (
 	"hash/fnv"
 )
 
-type fnvHash struct{}
+type FNVHash struct{}
 
-var fnvHash64 = fnv.New64()
+var FNVHash64 = fnv.New64()
 
-func (fnvHash) GenLink(s string) string {
-	fnvHash64.Reset()
-	_, err := fnvHash64.Write([]byte(s))
+func (FNVHash) GenLink(s string) string {
+	FNVHash64.Reset()
+	_, err := FNVHash64.Write([]byte(s))
 	if err != nil {
 		return err.Error()
 	}
-	return uint64ToShortLink(fnvHash64.Sum64())
+	return uint64ToShortLink(FNVHash64.Sum64())
 }
