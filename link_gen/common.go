@@ -5,7 +5,12 @@
 
 package link_gen
 
+import "short_link_sys_web_be/conf"
+
+var minLength int
+
 func Init() {
+	conf.GlobalConfig.GetInt("handler.link.minLength")
 	SnowflakeInit()
 }
 
@@ -25,7 +30,7 @@ func uint64ToBase62(n uint64) string {
 }
 
 func fillZero(str string) string {
-	for len(str) < 6 {
+	for len(str) < minLength {
 		str = "0" + str
 	}
 	return str

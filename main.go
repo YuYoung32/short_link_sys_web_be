@@ -9,6 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"short_link_sys_web_be/conf"
 	"short_link_sys_web_be/database"
+	linkHandler "short_link_sys_web_be/handler/link"
 	serverHandler "short_link_sys_web_be/handler/server"
 	visitHandler "short_link_sys_web_be/handler/visit"
 	"short_link_sys_web_be/link_gen"
@@ -22,6 +23,8 @@ func init() {
 	log.Init()
 	link_gen.Init()
 	database.Init()
+
+	linkHandler.Init()
 	visitHandler.Init()
 	serverHandler.Init()
 	log.GetLogger().Info("all module has init")

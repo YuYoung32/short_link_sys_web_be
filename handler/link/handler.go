@@ -8,11 +8,33 @@ package link
 import (
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"short_link_sys_web_be/conf"
 	"short_link_sys_web_be/database"
 	. "short_link_sys_web_be/handler/common"
+	"short_link_sys_web_be/link_gen"
+	"short_link_sys_web_be/log"
 	"strconv"
 	"strings"
 )
+
+var linkGenAlgorithm link_gen.LinkGen
+
+func Init() {
+	mapAlgorithm := map[string]link_gen.LinkGen{
+		"murmurHash":   link_gen.MurmurHash{},
+		"xxHash":       link_gen.XXHash{},
+		"fnvHash":      link_gen.FNVHash{},
+		"simpleSeq":    link_gen.SimpleSequencer{},
+		"snowflakeSeq": link_gen.SnowflakeSequencer{},
+	}
+
+	if linkGenAlgorithm = mapAlgorithm[conf.GlobalConfig.GetString("handler.link.algorithm")]; linkGenAlgorithm == nil {
+		linkGenAlgorithm = mapAlgorithm["simpleSeq"]
+		log.GetLogger().Error("bad config: handler.link.algorithm")
+		return
+	}
+	log.GetLogger().Info("set link algorithm to: " + conf.GlobalConfig.GetString("handler.link.algorithm"))
+}
 
 func DetailsListHandler(ctx *gin.Context) {
 	db := database.GetDBInstance()
