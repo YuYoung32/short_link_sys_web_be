@@ -34,7 +34,7 @@ func TestMurmurHash(t *testing.T) {
 		l1 := murmur.GenLink(testCase.longLink)
 		l2 := murmur.GenLink(testCase.longLink)
 		if l1 != l2 {
-			t.Errorf("murmurhash generate link error")
+			t.Error("murmurhash generate link error", l1, l2)
 		} else {
 			t.Log(l1)
 		}
@@ -47,7 +47,20 @@ func TestXXHash(t *testing.T) {
 		l1 := xx.GenLink(testCase.longLink)
 		l2 := xx.GenLink(testCase.longLink)
 		if l1 != l2 {
-			t.Errorf("xxhash generate link error")
+			t.Error("xxhash generate link error", l1, l2)
+		} else {
+			t.Log(l1)
+		}
+	}
+}
+
+func TestFNVHash(t *testing.T) {
+	var fnv fnvHash
+	for _, testCase := range testCases {
+		l1 := fnv.GenLink(testCase.longLink)
+		l2 := fnv.GenLink(testCase.longLink)
+		if l1 != l2 {
+			t.Error("fnvhash generate link error", l1, l2)
 		} else {
 			t.Log(l1)
 		}
