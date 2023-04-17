@@ -67,13 +67,27 @@ func TestFNVHash(t *testing.T) {
 	}
 }
 
-func TestAutoIncrement(t *testing.T) {
+func TestSimpleSequencer(t *testing.T) {
 	var auto autoIncrement
 	for _, testCase := range testCases {
 		l1 := auto.GenLink(testCase.longLink)
 		l2 := auto.GenLink(testCase.longLink)
 		if l1 == l2 {
 			t.Error("autoincrement generate link error", l1, l2)
+		} else {
+			t.Log(l1, l2)
+		}
+	}
+}
+
+func TestSnowflakeSequencer(t *testing.T) {
+	SnowflakeInit()
+	var snow snowFlake
+	for _, testCase := range testCases {
+		l1 := snow.GenLink(testCase.longLink)
+		l2 := snow.GenLink(testCase.longLink)
+		if l1 == l2 {
+			t.Error("snowflake generate link error", l1, l2)
 		} else {
 			t.Log(l1, l2)
 		}

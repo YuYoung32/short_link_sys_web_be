@@ -5,6 +5,10 @@
 
 package link_gen
 
+func Init() {
+	SnowflakeInit()
+}
+
 type LinkGen interface {
 	GenLink(string) string
 }
