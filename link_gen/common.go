@@ -28,5 +28,5 @@ func fillZero(str string) string {
 }
 
 func uint64ToShortLink(n uint64) string {
-	return uint64ToBase62(n)
+	return fillZero(uint64ToBase62(n))
 }

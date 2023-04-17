@@ -66,3 +66,16 @@ func TestFNVHash(t *testing.T) {
 		}
 	}
 }
+
+func TestAutoIncrement(t *testing.T) {
+	var auto autoIncrement
+	for _, testCase := range testCases {
+		l1 := auto.GenLink(testCase.longLink)
+		l2 := auto.GenLink(testCase.longLink)
+		if l1 == l2 {
+			t.Error("autoincrement generate link error", l1, l2)
+		} else {
+			t.Log(l1, l2)
+		}
+	}
+}
