@@ -14,6 +14,7 @@ type Link struct {
 	ShortLink  string `json:"shortLink" gorm:"primaryKey"`
 	LongLink   string `json:"longLink"`
 	CreateTime int64  `json:"createTime" gorm:"autoCreateTime"`
+	UpdateTime int64  `json:"updateTime" gorm:"autoUpdateTime"`
 	Comment    string `json:"comment"`
 }
 
