@@ -27,10 +27,10 @@ func linkDataGenerator() []Link {
 	var detailsStore []Link
 	for i := 0; i < 100; i++ {
 		detailsStore = append(detailsStore, Link{
-			ShortLink:   RandomString(5) + strconv.Itoa(i),
-			LongLink:    "https://baidu.com",
-			UpdatedTime: time.Now().Unix(),
-			Comment:     "无",
+			ShortLink:  RandomString(5) + strconv.Itoa(i),
+			LongLink:   "https://baidu.com",
+			CreateTime: time.Now().Unix(),
+			Comment:    "无",
 		})
 	}
 	return detailsStore
