@@ -12,6 +12,8 @@ require (
 )
 
 require (
+	github.com/bits-and-blooms/bitset v1.6.0 // indirect
+	github.com/bits-and-blooms/bloom/v3 v3.3.1 // indirect
 	github.com/bwmarrin/snowflake v0.3.0 // indirect
 	github.com/bytedance/sonic v1.8.0 // indirect
 	github.com/cespare/xxhash v1.1.0 // indirect

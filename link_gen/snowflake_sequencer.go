@@ -6,7 +6,6 @@
 package link_gen
 
 import (
-	"fmt"
 	"github.com/bwmarrin/snowflake"
 	"short_link_sys_web_be/log"
 )
@@ -14,7 +13,6 @@ import (
 var node *snowflake.Node
 
 func SnowflakeInit() {
-	fmt.Println("Snowflake init")
 	var err error
 	node, err = snowflake.NewNode(1)
 	if err != nil {

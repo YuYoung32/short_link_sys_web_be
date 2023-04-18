@@ -6,7 +6,10 @@
 package link
 
 import (
+	"github.com/bits-and-blooms/bloom/v3"
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
+	"math/rand"
 	"net/http"
 	"short_link_sys_web_be/conf"
 	"short_link_sys_web_be/database"
@@ -15,11 +18,15 @@ import (
 	"short_link_sys_web_be/log"
 	"strconv"
 	"strings"
+	"time"
 )
 
 var linkGenAlgorithm link_gen.LinkGen
+var shortLinkBF *bloom.BloomFilter
+var longLinkBF *bloom.BloomFilter
 
 func Init() {
+	logger := log.GetLogger()
 	mapAlgorithm := map[string]link_gen.LinkGen{
 		"murmurHash":   link_gen.MurmurHash{},
 		"xxHash":       link_gen.XXHash{},
@@ -28,12 +35,68 @@ func Init() {
 		"snowflakeSeq": link_gen.SnowflakeSequencer{},
 	}
 
-	if linkGenAlgorithm = mapAlgorithm[conf.GlobalConfig.GetString("handler.link.algorithm")]; linkGenAlgorithm == nil {
+	algorithmName := conf.GlobalConfig.GetString("handler.link.algorithm")
+	if linkGenAlgorithm = mapAlgorithm[algorithmName]; linkGenAlgorithm == nil {
 		linkGenAlgorithm = mapAlgorithm["simpleSeq"]
-		log.GetLogger().Error("bad config: handler.link.algorithm")
+		logger.Error("bad config: handler.link.algorithm")
 		return
+	} else {
+		logger.Info("set link algorithm to: " + conf.GlobalConfig.GetString("handler.link.algorithm"))
 	}
-	log.GetLogger().Info("set link algorithm to: " + conf.GlobalConfig.GetString("handler.link.algorithm"))
+
+	longLinkBF = bloomFilterInit("long_link")
+	// 使用hash算法时, 才会使用短链的布隆过滤器
+	if linkGenAlgorithm.GetType() == link_gen.HashType {
+		shortLinkBF = bloomFilterInit("short_link")
+	}
+}
+
+// bloomFilterInit 布隆过滤器创造与初始化
+func bloomFilterInit(key string) *bloom.BloomFilter {
+	preFix := "handler.link.bloomFilter."
+	falsePositiveRateName := preFix + "falsePositiveRate"
+	expectedNumberOfElementsName := preFix + "expectedNumberOfElements"
+	needToLoadName := preFix + "needToLoad"
+	if !(conf.GlobalConfig.IsSet(falsePositiveRateName) &&
+		conf.GlobalConfig.IsSet(expectedNumberOfElementsName) &&
+		conf.GlobalConfig.IsSet(needToLoadName)) {
+		log.GetLoggerWithSkip(2).Error("bad config: " + falsePositiveRateName + " or " + expectedNumberOfElementsName)
+	}
+	bf := bloom.NewWithEstimates(
+		conf.GlobalConfig.GetUint(expectedNumberOfElementsName),
+		conf.GlobalConfig.GetFloat64(falsePositiveRateName))
+
+	if conf.GlobalConfig.GetBool(needToLoadName) {
+		now := time.Now()
+		log.GetLoggerWithSkip(2).Info("load data to bloom filter... ", now.Format("2006-01-02 15:04:05"))
+		db := database.GetDBInstance()
+		var links []string
+		db.Model(&database.Link{}).Pluck(key, &links)
+		for _, link := range links {
+			bf.AddString(link)
+		}
+		after := time.Now()
+		log.GetLoggerWithSkip(2).Info("succeed to load data to bloom filter, uses ", after.Sub(now).Seconds(), "s")
+	}
+	return bf
+}
+
+func genUniqueLink(longLink string) string {
+	var shortLink string
+	switch linkGenAlgorithm.GetType() {
+	case link_gen.HashType:
+		for {
+			shortLink = linkGenAlgorithm.GenLink(longLink)
+			if !shortLinkBF.TestString(shortLink) {
+				break
+			}
+			longLink = longLink + strconv.Itoa(rand.Int())
+			shortLink = linkGenAlgorithm.GenLink(longLink)
+		}
+	case link_gen.SeqType:
+		shortLink = linkGenAlgorithm.GenLink(longLink)
+	}
+	return shortLink
 }
 
 func DetailsListHandler(ctx *gin.Context) {
@@ -88,9 +151,28 @@ func AddLinkHandler(ctx *gin.Context) {
 	}
 
 	var detailsStore []database.Link
-	for i, link := range queryAddListBind {
+	for _, link := range queryAddListBind {
+		if longLinkBF.TestString(link.LongLink) {
+			// 排除假阳性
+			err := db.Where(&database.Link{LongLink: link.LongLink}).Take(&database.Link{}).Error
+			if err == nil {
+				// 已确认数据库中有该长链
+				continue
+			} else if err != gorm.ErrRecordNotFound {
+				log.GetLogger().Error(err)
+				return
+			}
+		}
+
+		// 已确认数据库中无长链
+		longLinkBF.AddString(link.LongLink)
+		shortLink := genUniqueLink(link.LongLink)
+		if shortLinkBF != nil {
+			shortLinkBF.AddString(shortLink)
+		}
+
 		detailsStore = append(detailsStore, database.Link{
-			ShortLink: "sgews" + strconv.Itoa(i),
+			ShortLink: shortLink,
 			LongLink:  link.LongLink,
 			Comment:   link.Comment,
 		})
@@ -111,9 +193,7 @@ func DelLinkHandler(ctx *gin.Context) {
 		ErrInvalidArgsResp(ctx)
 		return
 	}
-	for _, shortLink := range queryDelListBind.ShortLinks {
-		db.Delete(&database.Link{}, "short_link = ?", shortLink)
-	}
+	db.Where("short_link in (?)", queryDelListBind.ShortLinks).Delete(&database.Link{})
 	SuccessGeneralResp(ctx)
 }
 
@@ -132,11 +212,10 @@ func UpdateLinkHandler(ctx *gin.Context) {
 
 	var link database.Link
 	link.ShortLink = queryUpdateListBind.ShortLink
-	db.First(&link)
-	link.ShortLink = "newsl"
+	db.Take(&link)
 	link.LongLink = queryUpdateListBind.LongLink
 	link.Comment = queryUpdateListBind.Comment
-	db.Create(&link)
+	db.Updates(&link)
 	SuccessGeneralResp(ctx)
 }
 
