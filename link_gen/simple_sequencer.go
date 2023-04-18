@@ -13,3 +13,7 @@ func (SimpleSequencer) GenLink(s string) string {
 	start++
 	return uint64ToShortLink(start)
 }
+
+func (SimpleSequencer) GetType() AlgorithmType {
+	return SeqType
+}

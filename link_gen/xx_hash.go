@@ -13,3 +13,7 @@ func (XXHash) GenLink(s string) string {
 	hash := xxhash.Sum64String(s)
 	return uint64ToShortLink(hash)
 }
+
+func (XXHash) GetType() AlgorithmType {
+	return HashType
+}

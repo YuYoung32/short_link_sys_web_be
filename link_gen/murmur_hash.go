@@ -9,8 +9,12 @@ import "github.com/spaolacci/murmur3"
 
 type MurmurHash struct{}
 
-func (m MurmurHash) GenLink(s string) string {
+func (MurmurHash) GenLink(s string) string {
 	murmur3.New64()
 	hash := murmur3.Sum64([]byte(s))
 	return uint64ToShortLink(hash)
+}
+
+func (MurmurHash) GetType() AlgorithmType {
+	return HashType
 }

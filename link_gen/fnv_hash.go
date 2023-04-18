@@ -21,3 +21,7 @@ func (FNVHash) GenLink(s string) string {
 	}
 	return uint64ToShortLink(FNVHash64.Sum64())
 }
+
+func (FNVHash) GetType() AlgorithmType {
+	return HashType
+}

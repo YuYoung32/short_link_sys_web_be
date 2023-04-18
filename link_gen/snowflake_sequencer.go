@@ -28,3 +28,7 @@ type SnowflakeSequencer struct{}
 func (SnowflakeSequencer) GenLink(s string) string {
 	return uint64ToShortLink(uint64(node.Generate().Int64()))
 }
+
+func (SnowflakeSequencer) GetType() AlgorithmType {
+	return SeqType
+}

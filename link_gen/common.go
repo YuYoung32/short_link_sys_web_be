@@ -9,6 +9,13 @@ import "short_link_sys_web_be/conf"
 
 var minLength int
 
+type AlgorithmType int
+
+const (
+	HashType AlgorithmType = iota
+	SeqType
+)
+
 func Init() {
 	conf.GlobalConfig.GetInt("handler.link.minLength")
 	SnowflakeInit()
@@ -16,6 +23,7 @@ func Init() {
 
 type LinkGen interface {
 	GenLink(string) string
+	GetType() AlgorithmType
 }
 
 const base62 = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
