@@ -10,7 +10,9 @@ var start = uint64(1000000000000000000)
 type SimpleSequencer struct{}
 
 func (SimpleSequencer) GenLink(s string) string {
+	mutex.Lock()
 	start++
+	mutex.Unlock()
 	return uint64ToShortLink(start)
 }
 

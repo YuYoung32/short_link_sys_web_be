@@ -5,9 +5,15 @@
 
 package link_gen
 
-import "short_link_sys_web_be/conf"
+import (
+	"short_link_sys_web_be/conf"
+	"sync"
+)
 
-var minLength int
+var (
+	minLength int
+	mutex     = sync.Mutex{} // 互斥锁, 保证并发安全
+)
 
 type AlgorithmType int
 
@@ -17,7 +23,7 @@ const (
 )
 
 func Init() {
-	conf.GlobalConfig.GetInt("handler.link.minLength")
+	minLength = conf.GlobalConfig.GetInt("handler.link.minLength")
 	SnowflakeInit()
 }
 
