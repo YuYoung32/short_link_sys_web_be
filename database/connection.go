@@ -8,6 +8,7 @@ package database
 import (
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 	"short_link_sys_web_be/conf"
 	_ "short_link_sys_web_be/conf"
 	"short_link_sys_web_be/log"
@@ -18,22 +19,30 @@ var db *gorm.DB
 
 func Init() {
 	var err error
-	logger := log.GetLogger()
+	moduleLogger := log.GetLogger()
 
 	var dsn = conf.GlobalConfig.GetString("mysql.username") + ":" +
 		conf.GlobalConfig.GetString("mysql.password") + "@tcp(" +
 		conf.GlobalConfig.GetString("mysql.host") + ":" +
 		conf.GlobalConfig.GetString("mysql.port") + ")/" +
 		conf.GlobalConfig.GetString("mysql.database")
-	db, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	db, err = gorm.Open(mysql.Open(dsn), &gorm.Config{
+		Logger: logger.New(log.MainLogger, logger.Config{
+			SlowThreshold:             0,
+			Colorful:                  true,
+			IgnoreRecordNotFoundError: true,
+			ParameterizedQueries:      false,
+			LogLevel:                  logger.Warn,
+		}),
+	})
 	if err != nil {
-		logger.Error("failed to connect database: " + err.Error())
+		moduleLogger.Error("failed to connect database: " + err.Error())
 		panic("failed to connect database")
 	}
-	logger.Info("connect database success")
+	moduleLogger.Info("connect database success")
 	sqlDB, err := db.DB()
 	if err != nil {
-		logger.Error("failed to get sqlDB: " + err.Error())
+		moduleLogger.Error("failed to get sqlDB: " + err.Error())
 		panic("failed to get sqlDB")
 	}
 	sqlDB.SetMaxIdleConns(conf.GlobalConfig.GetInt("mysql.maxIdleConns"))

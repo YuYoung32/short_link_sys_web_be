@@ -11,7 +11,7 @@ import (
 )
 
 type Link struct {
-	ShortLink  string `json:"shortLink" gorm:"primaryKey"`
+	ShortLink  string `json:"shortLink" gorm:"type:varchar(255) COLLATE utf8_bin;primaryKey"`
 	LongLink   string `json:"longLink"`
 	CreateTime int64  `json:"createTime" gorm:"autoCreateTime"`
 	UpdateTime int64  `json:"updateTime" gorm:"autoUpdateTime"`

@@ -170,7 +170,6 @@ func AddLinkHandler(ctx *gin.Context) {
 		if shortLinkBF != nil {
 			shortLinkBF.AddString(shortLink)
 		}
-
 		detailsStore = append(detailsStore, database.Link{
 			ShortLink: shortLink,
 			LongLink:  link.LongLink,
@@ -178,7 +177,7 @@ func AddLinkHandler(ctx *gin.Context) {
 		})
 	}
 
-	db.Create(&detailsStore)
+	db.Create(detailsStore)
 	SuccessGeneralResp(ctx)
 }
 
