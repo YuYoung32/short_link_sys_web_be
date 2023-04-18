@@ -7,6 +7,7 @@ package link_gen
 
 import (
 	"short_link_sys_web_be/conf"
+	"strings"
 	"sync"
 )
 
@@ -25,6 +26,11 @@ const (
 func Init() {
 	minLength = conf.GlobalConfig.GetInt("handler.link.minLength")
 	SnowflakeInit()
+	simpleSequencerInit()
+}
+
+func Terminate() {
+	simpleSequencerTerminate()
 }
 
 type LinkGen interface {
@@ -39,6 +45,14 @@ func uint64ToBase62(n uint64) string {
 	for n > 0 {
 		result = string(base62[n%62]) + result
 		n = n / 62
+	}
+	return result
+}
+
+func base62ToUint64(s string) uint64 {
+	var result uint64
+	for _, c := range s {
+		result = result*62 + uint64(strings.IndexByte(base62, byte(c)))
 	}
 	return result
 }

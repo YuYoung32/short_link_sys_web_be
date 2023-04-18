@@ -1,14 +1,40 @@
+# mysql 配置 用于存储访问和短链信息
 mysql:
   host: localhost
   port: 3306
   username: root
-  password: root
-  database: test
+  password: password
+  database: short_link_sys
+  maxIdleConns: 10
+  maxOpenConns: 100
+  connMaxLifetime: 60 # minute
 
+# 本服务将会监听什么地址和端口
 server:
   host: localhost
   port: 8081
 
+# log等级和存储地址
 log:
   level: debug # debug, info, warn, error, fatal, panic
   path: ./log
+
+# 转发服务器地址和端口
+core:
+  host: localhost
+  port: 28081
+  authToken: token
+
+# handler相关配置
+handler:
+  link:
+    minLength: 6
+    algorithm: simpleSeq # murmurHash, xxHash, fnvHash, simpleSeq, snowflakeSeq
+    bloomFilter: # 布隆过滤器配置, 若算法是哈希算法, 则必须配置
+      falsePositiveRate: 0.0001 # 误判率
+      expectedNumberOfElements: 1000000 # 预计元素个数
+      needToLoad: true # 是否需要加载已有数据
+    simpleSeq: # 程序记录, 不要手动修改
+      start: 1000000000 # simpleSeq算法的起始值, 用于持久化
+  server:
+    transferGap: 1000 # 单位ms
