@@ -13,8 +13,8 @@ type IPSourceResponse struct {
 }
 
 type DetailsListResponse struct {
-	VisitDetails       []database.Visit `json:"visitDetails"`
-	VisitDetailsAmount int64            `json:"visitDetailsAmount"`
+	VisitDetails       []database.LinkVisit `json:"visitDetails"`
+	VisitDetailsAmount int64                `json:"visitDetailsAmount"`
 }
 
 type AmountResponse struct {
