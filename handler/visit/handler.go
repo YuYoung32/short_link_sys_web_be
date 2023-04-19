@@ -80,10 +80,14 @@ func IPListHandler(ctx *gin.Context) {
 	db := database.GetDBInstance()
 	var ipSourceResponse IPSourceResponse
 	begin, end, err := utils.ConvertAndCheckTimeGroup(ctx.Query("begin"), ctx.Query("end"))
+	shortLink := ctx.Query("shortLink")
 
+	if shortLink != "" {
+		db = db.Where("short_link = ?", shortLink)
+	}
 	rows, err := db.Model(&database.LinkVisit{}).
-		Select("ip, count(*) as amount").
-		Where("visit_time >= ? and visit_time <= ?", begin, end).Group("ip").
+		Select("region, count(*) as amount").
+		Where("visit_time >= ? and visit_time <= ?", begin, end).Group("region").
 		Rows()
 	defer func(rows *sql.Rows) {
 		err := rows.Close()
@@ -96,14 +100,14 @@ func IPListHandler(ctx *gin.Context) {
 	}
 
 	for rows.Next() {
-		var ip string
+		var region string
 		var amount int
-		if err = rows.Scan(&ip, &amount); err != nil {
+		if err = rows.Scan(&region, &amount); err != nil {
 			logger.Error(err)
 			continue
 		}
 		ipSourceResponse.Amount = append(ipSourceResponse.Amount, amount)
-		ipSourceResponse.Region = append(ipSourceResponse.Region, ip)
+		ipSourceResponse.Region = append(ipSourceResponse.Region, region)
 	}
 
 	if err != nil {
