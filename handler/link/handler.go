@@ -11,6 +11,7 @@ import (
 	"gorm.io/gorm"
 	"math/rand"
 	"net/http"
+	"net/url"
 	"short_link_sys_web_be/conf"
 	"short_link_sys_web_be/database"
 	. "short_link_sys_web_be/handler/common"
@@ -138,6 +139,17 @@ func DetailsListHandler(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, details)
 }
 
+func processRawLink(rawLink string) string {
+	parse, err := url.Parse(rawLink)
+	if err != nil {
+		log.GetLogger().Error("url parse error: ", err)
+	}
+	if parse.Scheme != "" && parse.Host != "" {
+		return rawLink
+	}
+	return "http://" + rawLink
+}
+
 func AddLinkHandler(ctx *gin.Context) {
 	db := database.GetDBInstance()
 
@@ -152,9 +164,12 @@ func AddLinkHandler(ctx *gin.Context) {
 
 	var detailsStore []database.Link
 	for _, link := range queryAddListBind {
-		if longLinkBF.TestString(link.LongLink) {
+		// 绝对连接检测与转换
+		longLink := processRawLink(link.LongLink)
+		// 布隆过滤器检测是否已经存在长链, 若存在无需再次添加
+		if longLinkBF.TestString(longLink) {
 			// 排除假阳性
-			err := db.Where(&database.Link{LongLink: link.LongLink}).Take(&database.Link{}).Error
+			err := db.Where(&database.Link{LongLink: longLink}).Take(&database.Link{}).Error
 			if err == nil {
 				// 已确认数据库中有该长链
 				continue
@@ -165,14 +180,14 @@ func AddLinkHandler(ctx *gin.Context) {
 		}
 
 		// 已确认数据库中无长链
-		longLinkBF.AddString(link.LongLink)
-		shortLink := genUniqueLink(link.LongLink)
+		longLinkBF.AddString(longLink)
+		shortLink := genUniqueLink(longLink)
 		if shortLinkBF != nil {
 			shortLinkBF.AddString(shortLink)
 		}
 		detailsStore = append(detailsStore, database.Link{
 			ShortLink: shortLink,
-			LongLink:  link.LongLink,
+			LongLink:  longLink,
 			Comment:   link.Comment,
 		})
 	}
