@@ -18,7 +18,7 @@ func GetTodayBeginTime() int64 {
 	return time.Date(year, month, day, 0, 0, 0, 0, now.Location()).Unix()
 }
 
-// ConvertAndCheckTimeGroup 将时间字符串转换为时间戳并检查是否合法(beginStr<=endStr && endStr<=当前时间)
+// ConvertAndCheckTimeGroup 将时间戳转换为int64并检查是否合法(beginStr<=endStr && endStr<=当前时间)
 func ConvertAndCheckTimeGroup(beginStr string, endStr string) (begin int64, end int64, err error) {
 	if beginStr == "" || endStr == "" {
 		err = errors.New("miss args")

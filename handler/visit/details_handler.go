@@ -16,6 +16,7 @@ import (
 	"strings"
 )
 
+// 检查传入的IP地址是否合法, 并将其中的通配符替换为%, 用于数据库查询
 func checkAndReplaceIPStr(ip []string) ([]string, error) {
 	for i, item := range ip {
 		ipNums := strings.Split(item, ".")

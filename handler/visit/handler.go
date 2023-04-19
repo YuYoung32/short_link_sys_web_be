@@ -6,41 +6,19 @@
 package visit
 
 import (
+	"database/sql"
 	_ "embed"
-	"encoding/json"
 	"github.com/gin-gonic/gin"
-	"math/rand"
+	"gorm.io/gorm"
 	"net/http"
+	"short_link_sys_web_be/database"
 	"short_link_sys_web_be/handler/common"
 	"short_link_sys_web_be/log"
 	"short_link_sys_web_be/utils"
 	"time"
 )
 
-var (
-	//go:embed province_code.json
-	provinceCodeFile []byte
-	ProvinceList     []string
-	CodeList         []string
-	ProvinceToCode   = make(map[string]string)
-	CodeToProvince   = make(map[string]string)
-)
-
 func Init() {
-	logger := log.GetLogger()
-
-	var data []map[string]string
-	err := json.Unmarshal(provinceCodeFile, &data)
-	if err != nil {
-		logger.Error("Unmarshal province_code.json failed: " + err.Error())
-		return
-	}
-	for _, item := range data {
-		ProvinceList = append(ProvinceList, item["name"])
-		CodeList = append(CodeList, item["code"])
-		ProvinceToCode[item["name"]] = item["code"]
-		CodeToProvince[item["code"]] = item["name"]
-	}
 }
 
 // 生成24小时的
@@ -61,34 +39,6 @@ func testBetweenVADataGenerator(begin int64, end int64) StaticsListResponse {
 		statics.IPAmountList = append(statics.IPAmountList, begin/1000+10*int64(i))
 	}
 	return statics
-}
-
-// getRandArr 生成随机数组 数组内容0-32
-func getRandArr() []int {
-	arr := make([]int, 33)
-	for i := 0; i < len(arr); i++ {
-		arr[i] = i
-	}
-	rand.Seed(time.Now().UnixNano())
-
-	// 使用 Fisher-Yates 洗牌算法打乱数组
-	for i := len(arr) - 1; i > 0; i-- {
-		j := rand.Intn(i + 1)
-		arr[i], arr[j] = arr[j], arr[i]
-	}
-	return arr
-}
-
-func testDayIPDataGenerator() IPSourceResponse {
-	provinceList := getRandArr()
-	amountList := getRandArr()
-
-	var ipSource IPSourceResponse
-	for i := 0; i < 10; i++ {
-		ipSource.Amount = append(ipSource.Amount, amountList[i]+1)
-		ipSource.Region = append(ipSource.Region, ProvinceList[provinceList[i]])
-	}
-	return ipSource
 }
 
 func isSameDay(timestamp1, timestamp2 int64) bool {
@@ -125,20 +75,40 @@ func AmountTotalHandler(ctx *gin.Context) {
 	})
 }
 
-/*
-IPListHandler
-IP地址查询方法
-
-	https://ip.taobao.com/instructions
-	http://ip.taobao.com/outGetIpInfo?ips=8.8.8.8&accessKey=alibaba-inc
-*/
 func IPListHandler(ctx *gin.Context) {
-	ctx.Set("module", "ip_list_handler")
+	logger := log.GetLogger()
+	db := database.GetDBInstance()
+	var ipSourceResponse IPSourceResponse
+	begin, end, err := utils.ConvertAndCheckTimeGroup(ctx.Query("begin"), ctx.Query("end"))
 
-	_, _, err := utils.ConvertAndCheckTimeGroup(ctx.Query("begin"), ctx.Query("end"))
+	rows, err := db.Model(&database.LinkVisit{}).
+		Select("ip, count(*) as amount").
+		Where("visit_time >= ? and visit_time <= ?", begin, end).Group("ip").
+		Rows()
+	defer func(rows *sql.Rows) {
+		err := rows.Close()
+		if err != nil {
+			logger.Error(err)
+		}
+	}(rows)
+	if err != nil && err != gorm.ErrRecordNotFound {
+		logger.Error(err)
+	}
+
+	for rows.Next() {
+		var ip string
+		var amount int
+		if err = rows.Scan(&ip, &amount); err != nil {
+			logger.Error(err)
+			continue
+		}
+		ipSourceResponse.Amount = append(ipSourceResponse.Amount, amount)
+		ipSourceResponse.Region = append(ipSourceResponse.Region, ip)
+	}
+
 	if err != nil {
 		common.ErrInvalidArgsResp(ctx)
 		return
 	}
-	ctx.JSON(http.StatusOK, testDayIPDataGenerator())
+	ctx.JSON(http.StatusOK, ipSourceResponse)
 }
