@@ -135,7 +135,7 @@ func DetailsListHandler(ctx *gin.Context) {
 
 	var details DetailsListResponse
 	db.Model(&database.Link{}).Where(strings.Join(queryTemplateList, " or "), queryArgsList...).Count(&details.LinksTotal)
-	db.Where(strings.Join(queryTemplateList, " or "), queryArgsList...).Limit(intSize).Find(&details.Links)
+	db.Where(strings.Join(queryTemplateList, " or "), queryArgsList...).Limit(intSize).Order("update_time desc").Find(&details.Links)
 	ctx.JSON(http.StatusOK, details)
 }
 

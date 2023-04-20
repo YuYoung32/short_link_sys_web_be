@@ -111,6 +111,10 @@ func DetailsListHandler(ctx *gin.Context) {
 	//endregion
 
 	var resp DetailsListResponse
-	db.Where(strings.Join(queryTemplateList, " and "), queryArgsList...).Find(&resp.VisitDetails).Count(&resp.VisitDetailsAmount)
+	db.Where(strings.Join(queryTemplateList, " and "), queryArgsList...).
+		Order("visit_time desc").
+		Limit(MaxSearchAmount).
+		Find(&resp.VisitDetails).
+		Count(&resp.VisitDetailsAmount)
 	ctx.JSON(http.StatusOK, resp)
 }
