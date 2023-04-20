@@ -22,6 +22,6 @@ type AmountResponse struct {
 }
 
 type StaticsListResponse struct {
-	VisitAmountList []int64 `json:"visitAmount"`
-	IPAmountList    []int64 `json:"ipAmount"`
+	VisitAmountList []int `json:"visitAmount"`
+	IPAmountList    []int `json:"ipAmount"`
 }
