@@ -49,7 +49,6 @@ func isSameDay(timestamp1, timestamp2 int64) bool {
 
 // StaticsListHandler 获取指定时间段的访问量, 同天返回24小时, 其余分天
 func StaticsListHandler(ctx *gin.Context) {
-	ctx.Set("module", "amount_list_handler")
 	begin, end, err := utils.ConvertAndCheckTimeGroup(ctx.Query("begin"), ctx.Query("end"))
 	if err != nil {
 		common.ErrInvalidArgsResp(ctx)
@@ -80,14 +79,21 @@ func IPListHandler(ctx *gin.Context) {
 	db := database.GetDBInstance()
 	var ipSourceResponse IPSourceResponse
 	begin, end, err := utils.ConvertAndCheckTimeGroup(ctx.Query("begin"), ctx.Query("end"))
+	if err != nil {
+		common.ErrInvalidArgsResp(ctx)
+		return
+	}
 	shortLink := ctx.Query("shortLink")
 
+	var whereTemplate = "visit_time >= ? and visit_time <= ?"
+	var whereArgs = []interface{}{begin, end}
 	if shortLink != "" {
-		db = db.Where("short_link = ?", shortLink)
+		whereTemplate += " and short_link = ?"
+		whereArgs = append(whereArgs, shortLink)
 	}
 	rows, err := db.Model(&database.LinkVisit{}).
 		Select("region, count(*) as amount").
-		Where("visit_time >= ? and visit_time <= ?", begin, end).Group("region").
+		Where(whereTemplate, whereArgs...).Group("region").
 		Rows()
 	defer func(rows *sql.Rows) {
 		err := rows.Close()
