@@ -27,6 +27,10 @@ var (
 		mutex  sync.Mutex
 		info1s Info1s
 	}
+	isForwardServerOnlineWrapper struct {
+		mutex    sync.Mutex
+		isOnline bool
+	}
 
 	upgrader = websocket.Upgrader{
 		CheckOrigin: func(r *http.Request) bool {
@@ -86,8 +90,14 @@ func fetchInfoFromCore() {
 				_, dynamicInfoBytes, err := conn.ReadMessage()
 				if err != nil {
 					moduleLogger.Error("read dynamic message failed: ", err)
+					isForwardServerOnlineWrapper.mutex.Lock()
+					isForwardServerOnlineWrapper.isOnline = false
+					isForwardServerOnlineWrapper.mutex.Unlock()
 					return
 				}
+				isForwardServerOnlineWrapper.mutex.Lock()
+				isForwardServerOnlineWrapper.isOnline = true
+				isForwardServerOnlineWrapper.mutex.Unlock()
 
 				info1SWrapper.mutex.Lock()
 				if err = json.Unmarshal(dynamicInfoBytes, &info1SWrapper.info1s); err != nil {
@@ -148,6 +158,19 @@ func RealtimeDataHandler(ctx *gin.Context) {
 
 	// 每秒发送数据
 	for {
+		isForwardServerOnlineWrapper.mutex.Lock()
+		if !isForwardServerOnlineWrapper.isOnline {
+			isForwardServerOnlineWrapper.mutex.Unlock()
+			moduleLogger.Error("forward server is offline")
+			err := conn.WriteMessage(websocket.CloseMessage, []byte("forward server is offline"))
+			if err != nil {
+				moduleLogger.Error(err)
+				return
+			}
+			return
+		}
+		isForwardServerOnlineWrapper.mutex.Unlock()
+
 		info1SWrapper.mutex.Lock()
 		info1SWrapper.info1s.CPURunningTime = time.Now().Unix() - staticInfo.CPUStaticInfo.StartTime
 		err = conn.WriteJSON(info1SWrapper.info1s)
