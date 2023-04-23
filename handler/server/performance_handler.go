@@ -40,7 +40,7 @@ var (
 )
 
 func Init() {
-	fetchInfoFromCore()
+	go fetchInfoFromCore()
 }
 
 // fetchInfoFromCore 从转发服务器获取数据
@@ -51,7 +51,12 @@ func fetchInfoFromCore() {
 	moduleLogger.Debug("wsURL ", wsURL)
 	conn, _, err := websocket.DefaultDialer.Dial(wsURL, nil)
 	if err != nil {
-		moduleLogger.Error("dial ws failed: ", err)
+		// 失败重连, 无限尝试
+		moduleLogger.Debug("dial ws failed: ", err)
+		defer func() {
+			go fetchInfoFromCore()
+		}()
+		time.Sleep(time.Second * 5)
 		return
 	}
 
@@ -93,6 +98,9 @@ func fetchInfoFromCore() {
 					isForwardServerOnlineWrapper.mutex.Lock()
 					isForwardServerOnlineWrapper.isOnline = false
 					isForwardServerOnlineWrapper.mutex.Unlock()
+					defer func() {
+						go fetchInfoFromCore()
+					}()
 					return
 				}
 				isForwardServerOnlineWrapper.mutex.Lock()
