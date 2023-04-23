@@ -1,11 +1,16 @@
 module short_link_sys_web_be
 
-go 1.19
+go 1.17
 
 require (
+	github.com/bits-and-blooms/bloom/v3 v3.3.1
+	github.com/bwmarrin/snowflake v0.3.0
+	github.com/cespare/xxhash v1.1.0
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/gin-gonic/gin v1.9.0
 	github.com/gorilla/websocket v1.5.0
 	github.com/sirupsen/logrus v1.9.0
+	github.com/spaolacci/murmur3 v1.1.0
 	github.com/spf13/viper v1.15.0
 	gorm.io/driver/mysql v1.5.0
 	gorm.io/gorm v1.24.7-0.20230306060331-85eaf9eeda11
@@ -13,10 +18,7 @@ require (
 
 require (
 	github.com/bits-and-blooms/bitset v1.6.0 // indirect
-	github.com/bits-and-blooms/bloom/v3 v3.3.1 // indirect
-	github.com/bwmarrin/snowflake v0.3.0 // indirect
 	github.com/bytedance/sonic v1.8.0 // indirect
-	github.com/cespare/xxhash v1.1.0 // indirect
 	github.com/chenzhuoyu/base64x v0.0.0-20221115062448-fe3a3abad311 // indirect
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect
@@ -37,7 +39,6 @@ require (
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/pelletier/go-toml/v2 v2.0.6 // indirect
-	github.com/spaolacci/murmur3 v1.1.0 // indirect
 	github.com/spf13/afero v1.9.3 // indirect
 	github.com/spf13/cast v1.5.0 // indirect
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect

@@ -20,6 +20,7 @@ import (
 	"short_link_sys_web_be/log"
 	"short_link_sys_web_be/middleware"
 	"short_link_sys_web_be/router"
+	"short_link_sys_web_be/utils"
 	"syscall"
 	"time"
 )
@@ -28,6 +29,8 @@ func init() {
 	conf.Init()
 	log.Init()
 	database.Init()
+
+	utils.Init()
 
 	link_gen.Init()
 	linkHandler.Init()

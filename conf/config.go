@@ -14,7 +14,10 @@ var GlobalConfig = viper.New()
 func Init() {
 	GlobalConfig.SetConfigName("config")
 	GlobalConfig.SetConfigType("yaml")
-	GlobalConfig.AddConfigPath("C:\\Users\\29011\\GolandProjects\\short_link_sys_web_be\\conf\\")
+	GlobalConfig.AddConfigPath("C:\\Users\\29011\\GolandProjects\\short_link_sys_web_be\\conf")
+
+	GlobalConfig.WatchConfig()
+
 	if err := GlobalConfig.ReadInConfig(); err != nil {
 		panic(err)
 	}

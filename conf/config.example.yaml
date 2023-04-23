@@ -38,3 +38,10 @@ handler:
       start: 1000000000 # simpleSeq算法的起始值, 用于持久化
   server:
     transferGap: 1000 # 单位ms
+
+auth:
+  password: pass # 管理员口令, 忘记密码修改这里无需重启
+  jwt:
+    expire: 1 # 单位小时
+    secret: signature # jwt服务器签名
+    issuer: short_link_sys # jwt签发者
