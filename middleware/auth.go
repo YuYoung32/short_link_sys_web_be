@@ -14,24 +14,37 @@ import (
 )
 
 func AuthMiddleware(ctx *gin.Context) {
+	var token string
 	reqAuth := ctx.Request.Header.Get("Authorization")
-	s := bytes.Split([]byte(reqAuth), []byte(" "))
-	if len(s) != 2 {
-		ctx.JSON(http.StatusUnauthorized, gin.H{
-			"msg": "请求头中无Authorization字段或错误格式",
-		})
-		ctx.Abort()
-		return
+	if reqAuth == "" {
+		token = ctx.Query("token")
+		if token == "" {
+			ctx.JSON(http.StatusUnauthorized, gin.H{
+				"msg": "no Authorization field",
+			})
+			ctx.Abort()
+			return
+		}
+	} else {
+		s := bytes.Split([]byte(reqAuth), []byte(" "))
+		if len(s) != 2 {
+			ctx.JSON(http.StatusUnauthorized, gin.H{
+				"msg": "no Authorization field",
+			})
+			ctx.Abort()
+			return
+		}
+		token = string(s[1])
 	}
 
-	ok, err := utils.ValidToken(string(s[1]))
+	ok, err := utils.ValidToken(token)
 	if err != nil {
 		log.GetLogger().Debug("token error: ", err)
 		ctx.Abort()
 		return
 	}
 	if !ok {
-		log.GetLogger().Debug("token invalid: ", string(s[1]))
+		log.GetLogger().Debug("token invalid: ", token)
 		ctx.Abort()
 		return
 	}
