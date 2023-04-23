@@ -40,7 +40,8 @@ func LinkRouter(engine *gin.Engine) {
 
 func AuthRouter(engine *gin.Engine) {
 	group := engine.Group("/auth")
-	group.GET("/login", auth.LoginHandler)
+	group.POST("/login", auth.LoginHandler)
+	group.POST("/modify", auth.ChangePasswordHandler)
 }
 
 func LoadAllRouter(engine *gin.Engine) {
