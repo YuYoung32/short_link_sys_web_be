@@ -38,21 +38,22 @@ type LinkGen interface {
 	GetType() AlgorithmType
 }
 
-const base62 = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+const base = "hibnP8XAcde7qrsIFzMUaZgHVJ3f0STu169WjklmGy4BCDLEQRvwtY25xKopNO"
+const baseLen = uint64(len(base))
 
-func uint64ToBase62(n uint64) string {
+func uint64ToBase(n uint64) string {
 	var result string
 	for n > 0 {
-		result = string(base62[n%62]) + result
-		n = n / 62
+		result = string(base[n%baseLen]) + result
+		n = n / baseLen
 	}
 	return result
 }
 
-func base62ToUint64(s string) uint64 {
+func baseToUint64(s string) uint64 {
 	var result uint64
 	for _, c := range s {
-		result = result*62 + uint64(strings.IndexByte(base62, byte(c)))
+		result = result*baseLen + uint64(strings.IndexByte(base, byte(c)))
 	}
 	return result
 }
@@ -65,5 +66,5 @@ func fillZero(str string) string {
 }
 
 func uint64ToShortLink(n uint64) string {
-	return fillZero(uint64ToBase62(n))
+	return fillZero(uint64ToBase(n))
 }
