@@ -1,0 +1,1 @@
+CREATE DATABASE short_link_sys;

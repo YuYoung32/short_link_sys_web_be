@@ -1,3 +1,4 @@
+use short_link_sys;
 create view link_visits as
 select links.short_link, links.long_link, links.comment, visits.ip, visits.region, visits.visit_time
 from links
