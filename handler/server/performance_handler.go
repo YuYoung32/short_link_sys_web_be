@@ -62,7 +62,7 @@ func fetchInfoFromCore() {
 
 	// auth 验证
 	go func() {
-		moduleLogger.Debug("lcoal auth: ", conf.GlobalConfig.GetString("core.authToken"))
+		moduleLogger.Debug("local auth: ", conf.GlobalConfig.GetString("core.authToken"))
 		err := conn.WriteMessage(websocket.TextMessage, []byte(conf.GlobalConfig.GetString("core.authToken")))
 		if err != nil {
 			moduleLogger.Error("write auth failed: ", err)

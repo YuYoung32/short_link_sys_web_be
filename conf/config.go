@@ -6,6 +6,7 @@
 package conf
 
 import (
+	"fmt"
 	"github.com/spf13/viper"
 )
 
@@ -14,11 +15,12 @@ var GlobalConfig = viper.New()
 func Init() {
 	GlobalConfig.SetConfigName("config")
 	GlobalConfig.SetConfigType("yaml")
-	GlobalConfig.AddConfigPath("C:\\Users\\29011\\GolandProjects\\short_link_sys_web_be\\conf")
+	GlobalConfig.AddConfigPath("./conf")
 
 	GlobalConfig.WatchConfig()
 
 	if err := GlobalConfig.ReadInConfig(); err != nil {
+		fmt.Println(fmt.Errorf("Fatal error config file: %s \n", err))
 		panic(err)
 	}
 }
