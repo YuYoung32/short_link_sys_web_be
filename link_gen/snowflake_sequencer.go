@@ -23,7 +23,7 @@ func SnowflakeInit() {
 
 type SnowflakeSequencer struct{}
 
-func (SnowflakeSequencer) GenLink(s string) string {
+func (SnowflakeSequencer) GenLink(_ string) string {
 	return uint64ToShortLink(uint64(node.Generate().Int64()))
 }
 

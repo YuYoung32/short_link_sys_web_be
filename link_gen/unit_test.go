@@ -96,8 +96,15 @@ func TestSnowflakeSequencer(t *testing.T) {
 
 func TestBaseTransfer(t *testing.T) {
 	var num uint64 = 14359782486248358
-	newNum := base62ToUint64(uint64ToBase62(num))
+	newNum := baseToUint64(uint64ToBase(num))
 	if num != newNum {
 		t.Error("base transfer error", num, newNum)
 	}
+}
+func TestContinueBaseTransfer(t *testing.T) {
+	baseNum := uint64(10000000)
+	for i := baseNum; i < baseNum+10; i++ {
+		t.Log(uint64ToBase(i))
+	}
+
 }

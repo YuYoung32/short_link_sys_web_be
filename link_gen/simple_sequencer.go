@@ -34,7 +34,7 @@ func simpleSequencerTerminate() {
 	}
 }
 
-func (SimpleSequencer) GenLink(s string) string {
+func (SimpleSequencer) GenLink(_ string) string {
 	mutex.Lock()
 	newCode := code
 	code++
