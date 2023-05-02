@@ -24,4 +24,11 @@ func init() {
 		fmt.Println(fmt.Errorf("Fatal error config file: %s \n", err))
 		panic(err)
 	}
+
+	if GlobalConfig.GetString("mode") == "dev" {
+		devConfig := GlobalConfig.Sub("dev")
+		for _, v := range devConfig.AllKeys() {
+			GlobalConfig.Set(v, devConfig.Get(v))
+		}
+	}
 }
