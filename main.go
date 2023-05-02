@@ -36,7 +36,7 @@ func main() {
 		gin.SetMode(gin.ReleaseMode)
 	}
 	engine := gin.New()
-	engine.Use(gin.LoggerWithWriter(log.MainLogger.Writer()))
+	engine.Use(gin.LoggerWithWriter(nil))
 	engine.Use(log.Middleware)
 	engine.Use(middleware.CrosMiddleware)
 	router.LoadAllRouter(engine)

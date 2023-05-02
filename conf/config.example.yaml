@@ -1,5 +1,6 @@
 # dev or release, dev是开发模式, 会打印更多日志, 使用测试数据库和相关配置,
 # dev相关配置会在dev命名空间下, release相关配置会在默认命名空间下, 最终配置是合并后的结果, 相同配置项dev优先
+# dev模式时log level为debug， release模式时为设定值
 mode: dev
 
 # mysql 配置 用于存储访问和短链信息
