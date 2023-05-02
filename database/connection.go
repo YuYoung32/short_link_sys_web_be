@@ -10,14 +10,13 @@ import (
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 	"short_link_sys_web_be/conf"
-	_ "short_link_sys_web_be/conf"
 	"short_link_sys_web_be/log"
 	"time"
 )
 
 var db *gorm.DB
 
-func Init() {
+func init() {
 	var err error
 	moduleLogger := log.GetLogger()
 

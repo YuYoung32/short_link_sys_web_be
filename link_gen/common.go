@@ -23,7 +23,7 @@ const (
 	SeqType
 )
 
-func Init() {
+func init() {
 	minLength = conf.GlobalConfig.GetInt("handler.link.minLength")
 	SnowflakeInit()
 	simpleSequencerInit()

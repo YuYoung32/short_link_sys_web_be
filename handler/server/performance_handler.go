@@ -39,7 +39,7 @@ var (
 	}
 )
 
-func Init() {
+func init() {
 	go fetchInfoFromCore()
 }
 

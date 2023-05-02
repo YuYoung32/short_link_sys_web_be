@@ -12,30 +12,15 @@ import (
 	"os"
 	"os/signal"
 	"short_link_sys_web_be/conf"
-	"short_link_sys_web_be/database"
-	linkHandler "short_link_sys_web_be/handler/link"
-	serverHandler "short_link_sys_web_be/handler/server"
-	visitHandler "short_link_sys_web_be/handler/visit"
 	"short_link_sys_web_be/link_gen"
 	"short_link_sys_web_be/log"
 	"short_link_sys_web_be/middleware"
 	"short_link_sys_web_be/router"
-	"short_link_sys_web_be/utils"
 	"syscall"
 	"time"
 )
 
 func init() {
-	conf.Init()
-	log.Init()
-	database.Init()
-
-	utils.Init()
-
-	link_gen.Init()
-	linkHandler.Init()
-	visitHandler.Init()
-	serverHandler.Init()
 	log.GetLogger().Info("all module has init")
 }
 

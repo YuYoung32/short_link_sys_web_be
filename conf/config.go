@@ -10,9 +10,10 @@ import (
 	"github.com/spf13/viper"
 )
 
-var GlobalConfig = viper.New()
+var GlobalConfig *viper.Viper
 
-func Init() {
+func init() {
+	GlobalConfig = viper.New()
 	GlobalConfig.SetConfigName("config")
 	GlobalConfig.SetConfigType("yaml")
 	GlobalConfig.AddConfigPath("./conf")

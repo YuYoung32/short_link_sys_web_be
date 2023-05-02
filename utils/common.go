@@ -5,6 +5,6 @@
 
 package utils
 
-func Init() {
+func init() {
 	authInit()
 }

@@ -7,7 +7,6 @@ package visit
 
 import (
 	"database/sql"
-	_ "embed"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 	"net/http"
@@ -17,9 +16,6 @@ import (
 	"short_link_sys_web_be/utils"
 	"time"
 )
-
-func Init() {
-}
 
 func isSameDay(timestamp1, timestamp2 int64) bool {
 	t1 := time.Unix(timestamp1, 0)

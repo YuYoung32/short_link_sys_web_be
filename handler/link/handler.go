@@ -26,7 +26,7 @@ var linkGenAlgorithm link_gen.LinkGen
 var shortLinkBF *bloom.BloomFilter
 var longLinkBF *bloom.BloomFilter
 
-func Init() {
+func init() {
 	logger := log.GetLogger()
 	mapAlgorithm := map[string]link_gen.LinkGen{
 		"murmurHash":   link_gen.MurmurHash{},

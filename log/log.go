@@ -16,11 +16,11 @@ import (
 
 var (
 	// MainLogger 全局Logrus实例
-	MainLogger = logrus.New()
+	MainLogger *logrus.Logger
 )
 
-// Init 配置Logrus
-func Init() {
+func init() {
+	MainLogger = logrus.New()
 	level := map[string]logrus.Level{
 		"debug": logrus.DebugLevel,
 		"info":  logrus.InfoLevel,
