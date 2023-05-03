@@ -39,6 +39,10 @@ func TestMurmurHash(t *testing.T) {
 			t.Log(l1)
 		}
 	}
+	t.Log(murmur.GenLink("https://www.baidu.com1"))
+	t.Log(murmur.GenLink("https://www.baidu.com2"))
+	t.Log(murmur.GenLink("https://www.baidu.com3"))
+
 }
 
 func TestXXHash(t *testing.T) {
