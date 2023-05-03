@@ -34,7 +34,7 @@ func simpleSequencerInit() {
 
 	bytes, err := os.ReadFile(filename)
 	if err != nil {
-		logger.Error("Failed to read file %s: %v", filename, err)
+		logger.Errorf("Failed to read file %s: %v", filename, err)
 	}
 	code, err = strconv.ParseUint(string(bytes), 10, 64)
 	logger.Infof("Read code %d from file %s", code, filename)
@@ -45,37 +45,14 @@ func simpleSequencerTerminate() {
 	filename := simpleSequencerPersistenceFilename
 	err := os.WriteFile(filename, []byte(strconv.FormatUint(code, 10)), 0666)
 	if err != nil {
-		logger.Error("Failed to write file %s: %v", filename, err)
+		logger.Errorf("Failed to write file %s: %v", filename, err)
 		return
 	}
-	//file, err := os.OpenFile(filename, os.O_CREATE|os.O_TRUNC, 0666)
-	//if err != nil {
-	//	logger.Error("Failed to create file %s: %v", filename, err)
-	//}
-	//defer func(file *os.File) {
-	//	err := file.Close()
-	//	if err != nil {
-	//		logger.Error("Failed to close file %s: %v", filename, err)
-	//	}
-	//}(file)
-	//
-	//n, err := file.WriteString(strconv.FormatUint(code, 10))
-	//logger.Infof("Write %d bytes to file %s", n, filename)
-	//if n == 0 || err != nil {
-	//	logger.Error("Failed to write data to file")
-	//}
-	//err = file.Sync()
-	//if err != nil {
-	//	logger.Error("Failed to sync file %s: %v", filename, err)
-	//	return
-	//}
 }
 
 func (SimpleSequencer) GenLink(_ string) string {
-	mutex.Lock()
 	newCode := code
 	code++
-	mutex.Unlock()
 	return uint64ToShortLink(newCode)
 }
 
