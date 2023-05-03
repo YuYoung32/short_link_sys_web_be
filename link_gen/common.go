@@ -38,7 +38,8 @@ type LinkGen interface {
 	GetType() AlgorithmType
 }
 
-const base = "hibnP8XAcde7qrsIFzMUaZgHVJ3f0STu169WjklmGy4BCDLEQRvwtY25xKopNO"
+//const base = "hibnP8XAcde7qrsIFzMUaZgHVJ3f0STu169WjklmGy4BCDLEQRvwtY25xKopNO"
+const base = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
 const baseLen = uint64(len(base))
 
 func uint64ToBase(n uint64) string {
