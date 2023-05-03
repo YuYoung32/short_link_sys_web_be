@@ -17,17 +17,12 @@ import (
 )
 
 func TestGenerateLinkData(t *testing.T) {
-	// 配置文件初始化
 	conf.GlobalConfig.SetConfigName("config")
 	conf.GlobalConfig.SetConfigType("yaml")
 	conf.GlobalConfig.AddConfigPath("../../conf")
 	if err := conf.GlobalConfig.ReadInConfig(); err != nil {
 		panic(err)
 	}
-	// 数据库初始化
-	database.Init()
-	// 生成初始化
-	link_gen.Init()
 
 	dataList := []database.Link{
 		{LongLink: "http://www.taobao.com", Comment: "测试1"},
@@ -123,8 +118,6 @@ func TestGenerateVisitData(t *testing.T) {
 	if err := conf.GlobalConfig.ReadInConfig(); err != nil {
 		panic(err)
 	}
-	// 数据库初始化
-	database.Init()
 
 	db := database.GetDBInstance()
 
