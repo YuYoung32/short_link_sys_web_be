@@ -50,6 +50,15 @@ func init() {
 	if linkGenAlgorithm.GetType() == link_gen.HashType {
 		shortLinkBF = bloomFilterInit("short_link")
 	}
+	go func() {
+		for {
+			time.Sleep(time.Hour * 24)
+			longLinkBF = bloomFilterInit("long_link")
+			if linkGenAlgorithm.GetType() == link_gen.HashType {
+				shortLinkBF = bloomFilterInit("short_link")
+			}
+		}
+	}()
 }
 
 // bloomFilterInit 布隆过滤器创造与初始化
