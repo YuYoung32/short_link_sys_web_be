@@ -39,8 +39,6 @@ handler:
       falsePositiveRate: 0.0001 # 误判率
       expectedNumberOfElements: 1000000 # 预计元素个数
       needToLoad: true # 是否需要加载已有数据
-    simpleSeq: # 程序记录, 不要手动修改
-      start: 1000000000 # simpleSeq算法的起始值
   server:
     transferGap: 1000 # 单位ms
 

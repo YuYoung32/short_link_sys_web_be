@@ -9,3 +9,5 @@ tmp
 conf/config.yaml
 
 *.log
+
+conf/config.yaml.bak
