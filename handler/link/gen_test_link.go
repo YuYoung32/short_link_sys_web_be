@@ -24,7 +24,7 @@ func GenerateLinkData(list []database.Link) error {
 	var _longLinkBF *bloom.BloomFilter
 
 	logger := log.GetLogger()
-	db := database.GetDBInstance()
+	db := database.GetMysqlInstance()
 	mapAlgorithm := map[string]link_gen.LinkGen{
 		"murmurHash":   link_gen.MurmurHash{},
 		"xxHash":       link_gen.XXHash{},

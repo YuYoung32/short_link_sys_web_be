@@ -46,7 +46,7 @@ func TestRW(t *testing.T) {
 		}
 	}
 
-	db := database.GetDBInstance()
+	db := database.GetMysqlInstance()
 	for i := 0; i < amount; i++ {
 		// 随机写
 		db.Where("1=1").Delete(&database.Link{})

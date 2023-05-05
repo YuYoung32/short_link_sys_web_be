@@ -121,7 +121,7 @@ func StaticsListHandler(ctx *gin.Context) {
 
 	var whereTemplate = "visit_time >= ? and visit_time <= ?"
 	var whereArgs = []interface{}{begin, end}
-	db := database.GetDBInstance()
+	db := database.GetMysqlInstance()
 
 	if shortLink != "" {
 		whereTemplate += " and short_link = ?"
@@ -149,7 +149,7 @@ func AmountTotalHandler(ctx *gin.Context) {
 
 func IPListHandler(ctx *gin.Context) {
 	logger := log.GetLogger()
-	db := database.GetDBInstance()
+	db := database.GetMysqlInstance()
 	var ipSourceResponse IPSourceResponse
 	begin, end, err := utils.ConvertAndCheckTimeGroup(ctx.Query("begin"), ctx.Query("end"))
 	if err != nil {

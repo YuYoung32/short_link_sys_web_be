@@ -38,7 +38,7 @@ func checkAndReplaceIPStr(ip []string) ([]string, error) {
 }
 
 func DetailsListHandler(ctx *gin.Context) {
-	db := database.GetDBInstance()
+	db := database.GetMysqlInstance()
 
 	//region 获取POST body参数
 	type QueryDetailsBind struct {

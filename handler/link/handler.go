@@ -79,7 +79,7 @@ func bloomFilterInit(key string) *bloom.BloomFilter {
 	if conf.GlobalConfig.GetBool(needToLoadName) {
 		now := time.Now()
 		log.GetLoggerWithSkip(2).Info("load data to bloom filter... ", now.Format("2006-01-02 15:04:05"))
-		db := database.GetDBInstance()
+		db := database.GetMysqlInstance()
 		var links []string
 		db.Model(&database.Link{}).Pluck(key, &links)
 		for _, link := range links {
@@ -110,7 +110,7 @@ func genUniqueLink(longLink string) string {
 }
 
 func DetailsListHandler(ctx *gin.Context) {
-	db := database.GetDBInstance()
+	db := database.GetMysqlInstance()
 
 	var intSize int
 	var queryTemplateList []string
@@ -160,7 +160,7 @@ func processRawLink(rawLink string) string {
 }
 
 func AddLinkHandler(ctx *gin.Context) {
-	db := database.GetDBInstance()
+	db := database.GetMysqlInstance()
 
 	var queryAddListBind []struct {
 		LongLink string `json:"longLink"`
@@ -207,7 +207,7 @@ func AddLinkHandler(ctx *gin.Context) {
 
 func DelLinkHandler(ctx *gin.Context) {
 	ctx.Set("module", "del_link_handler")
-	db := database.GetDBInstance()
+	db := database.GetMysqlInstance()
 
 	var queryDelListBind struct {
 		ShortLinks []string `json:"shortLinks"`
@@ -221,7 +221,7 @@ func DelLinkHandler(ctx *gin.Context) {
 }
 
 func UpdateLinkHandler(ctx *gin.Context) {
-	db := database.GetDBInstance()
+	db := database.GetMysqlInstance()
 
 	var queryUpdateListBind struct {
 		ShortLink string `json:"shortLink"`
@@ -243,7 +243,7 @@ func UpdateLinkHandler(ctx *gin.Context) {
 }
 
 func AmountTotalHandler(ctx *gin.Context) {
-	db := database.GetDBInstance()
+	db := database.GetMysqlInstance()
 
 	var amount AmountTotal
 	db.Model(&database.Link{}).Count(&amount.Amount)

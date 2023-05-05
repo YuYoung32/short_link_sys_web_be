@@ -119,7 +119,7 @@ func TestGenerateVisitData(t *testing.T) {
 		panic(err)
 	}
 
-	db := database.GetDBInstance()
+	db := database.GetMysqlInstance()
 
 	var shortLinks []string
 	type Visit struct {
