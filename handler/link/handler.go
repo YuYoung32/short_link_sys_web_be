@@ -6,6 +6,7 @@
 package link
 
 import (
+	"context"
 	"github.com/bits-and-blooms/bloom/v3"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -208,6 +209,7 @@ func AddLinkHandler(ctx *gin.Context) {
 func DelLinkHandler(ctx *gin.Context) {
 	ctx.Set("module", "del_link_handler")
 	db := database.GetMysqlInstance()
+	rdb := database.GetRedisInstance()
 
 	var queryDelListBind struct {
 		ShortLinks []string `json:"shortLinks"`
@@ -217,6 +219,9 @@ func DelLinkHandler(ctx *gin.Context) {
 		return
 	}
 	db.Where("short_link in (?)", queryDelListBind.ShortLinks).Delete(&database.Link{})
+	for _, link := range queryDelListBind.ShortLinks {
+		rdb.Del(context.Background(), link)
+	}
 	SuccessGeneralResp(ctx)
 }
 
