@@ -8,6 +8,8 @@ package perf
 import (
 	"github.com/wcharczuk/go-chart"
 	"github.com/wcharczuk/go-chart/drawing"
+	"gonum.org/v1/gonum/stat"
+	"math"
 	"net/http"
 	"os"
 	"strconv"
@@ -60,6 +62,77 @@ func saveForwardGraph1(x, y []float64, yName, path string) error {
 	//graph.Elements = []chart.Renderable{
 	//	chart.Legend(&graph),
 	//}
+	f, err := os.Create(path)
+	if err != nil {
+		return err
+	}
+	defer func(f *os.File) {
+		err := f.Close()
+		if err != nil {
+			return
+		}
+	}(f)
+	err = graph.Render(chart.PNG, f)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func saveForwardGraph3(x, y1, y2, y3 []float64, y1Name, y2Name, y3Name, path string) error {
+	graph := chart.Chart{
+		XAxis: chart.XAxis{
+			Name:      "Number of Concurrency",
+			NameStyle: chart.StyleShow(),
+			Style:     chart.StyleShow(),
+			ValueFormatter: func(v interface{}) string {
+				i, _ := v.(float64)
+				return strconv.Itoa(int(i))
+			},
+		},
+		YAxis: chart.YAxis{
+			Name:      "Average Consumption(ms)",
+			NameStyle: chart.StyleShow(),
+			Style:     chart.StyleShow(),
+			ValueFormatter: func(v interface{}) string {
+				i, _ := v.(float64)
+				return strconv.Itoa(int(i))
+			},
+		},
+
+		Series: []chart.Series{
+			chart.ContinuousSeries{
+				Name: y1Name,
+				Style: chart.Style{
+					Show:        true,
+					StrokeColor: chart.GetDefaultColor(0),
+				},
+				XValues: x,
+				YValues: y1,
+			},
+			chart.ContinuousSeries{
+				Name: y2Name,
+				Style: chart.Style{
+					Show:        true,
+					StrokeColor: chart.GetDefaultColor(1),
+				},
+				XValues: x,
+				YValues: y2,
+			},
+			chart.ContinuousSeries{
+				Name: y3Name,
+				Style: chart.Style{
+					Show:        true,
+					StrokeColor: chart.GetDefaultColor(2),
+				},
+				XValues: x,
+				YValues: y3,
+			},
+		},
+	}
+	graph.Elements = []chart.Renderable{
+		chart.Legend(&graph),
+	}
 	f, err := os.Create(path)
 	if err != nil {
 		return err
@@ -259,4 +332,42 @@ func TestReadDataFile(t *testing.T) {
 		return
 	}
 	t.Log(seq)
+}
+
+func TestMerge3Graph(t *testing.T) {
+	var seq []int
+	amount := 50
+	gap := 20
+	for i := 0; i < amount; i++ {
+		seq = append(seq, (i+1)*gap)
+	}
+	s1, _ := ReadFileToFloat64Slice("perf/forward_res/forward_url_concurrency_direct.txt")
+	s2, _ := ReadFileToFloat64Slice("perf/forward_res/forward_url_concurrency_redis.txt")
+	s3, _ := ReadFileToFloat64Slice("perf/forward_res/forward_url_concurrency_mysql.txt")
+	err := saveForwardGraph3(IntsToFloat64(seq), s1, s2, s3,
+		"Test1-Direct", "Test2-Redis", "Test3-MySQL",
+		"perf/forward_res/forward_url_merge.png")
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	s1a, s1b := stat.LinearRegression(IntsToFloat64(seq), s1, nil, false)
+	s2a, s2b := stat.LinearRegression(IntsToFloat64(seq), s2, nil, false)
+	s3a, s3b := stat.LinearRegression(IntsToFloat64(seq), s3, nil, false)
+	t.Log("direct mse and avg:", MSE(s1a, s1b, IntsToFloat64(seq), s1), stat.Mean(s1, nil))
+	t.Log("redis mse and avg:", MSE(s2a, s2b, IntsToFloat64(seq), s2), stat.Mean(s2, nil))
+	t.Log("mysql mse and avg:", MSE(s3a, s3b, IntsToFloat64(seq), s3), stat.Mean(s3, nil))
+	/**
+	  forward_server_test.go:357: direct mse and avg: 30.571982438486344 846.7745428400001
+	  forward_server_test.go:358: redis mse and avg: 40.478770237088845 794.9892512800001
+	  forward_server_test.go:359: mysql mse and avg: 123.02309329266231 1543.54138738
+	*/
+}
+
+func MSE(a, b float64, x, y []float64) float64 {
+	var sum float64
+	for i := 0; i < len(x); i++ {
+		sum += math.Pow(a+b*x[i]-y[i], 2)
+	}
+	return math.Pow(sum, 0.5) / float64(len(x))
 }

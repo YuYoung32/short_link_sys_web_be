@@ -16,6 +16,7 @@ import (
 	"time"
 )
 
+// TestGenerateLinkData 必须在测试环境使用, 否则对于序列算法会破坏长链生成的连续性
 func TestGenerateLinkData(t *testing.T) {
 	conf.GlobalConfig.SetConfigName("config")
 	conf.GlobalConfig.SetConfigType("yaml")
